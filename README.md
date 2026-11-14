@@ -2,7 +2,7 @@
 
 ![Polyphonic Earth: NASA Earth visualizations played as live music](assets/cover.png)
 
-**Hear our planet change.** Polyphonic Earth is an accessible *Earth Jukebox*. It turns NASA Earth Information Center (EIC) visualizations into live music in the browser, so anyone can explore Earth science with their ears, including people who are blind or have low vision.
+**Hear our planet change.** Polyphonic Earth **makes NASA Earth data accessible through sound.** It is an *Earth Jukebox* that turns NASA Earth Information Center (EIC) and NASA SVS visualizations into live music in the browser, so anyone can explore Earth science with their ears, including people who are blind or have low vision.
 
 Built for the **2026 NASA Space Apps Challenge**, challenge *"The Earth Information Jukebox"*, by team **Open Guys AI** (Mingachevir, Azerbaijan).
 
@@ -30,6 +30,18 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 - **A slow sweep.** Eight west-to-east slices per bar, long ambient notes, and a soft knock for slices with no data (land, in the ocean scene).
 - **Microtonal maqam tuning.** Notes use quarter-tone maqam scales (Rast, Saba, Hijaz). The value picks a scale degree and the remainder bends the note by up to ±25 cents, so small differences in the data stay audible. In the CO₂ scene two copies of the chord drift apart in cents as concentration rises, and you hear them beat.
 
+### Does the sound tell the truth?
+We measured it. Every number below comes from the app's own data and code; nothing is estimated by ear.
+
+| Check | Data | Result |
+|---|---|---|
+| **Mingachevir warming** | NASA POWER annual mean air temperature, 1981–2024 | 1981–1990 average **14.35 °C**, 2015–2024 average **15.71 °C**: **+1.36 °C**. All of the last 10 years are above the 1980s average. Linear trend +0.44 °C per decade. |
+| **…and the melody** | The same series through the app's pitch mapping (Rast maqam, 2 octaves) | The 2015–2024 notes sit on average **994 cents (about 10 semitones) higher** than the 1980s notes. The mapping is monotonic: a warmer year never plays a lower note (checked for every pair of the 44 years). |
+| **Night lights 2012 → 2023** | Total detected light in the VIIRS Black Marble frames, measured by the app | **+69 %** over the period (2013 +4 %, 2017 +20 %, 2021 +28 %, 2022 +55 %, 2023 +69 %). The jump in 2022 may partly come from changes in the yearly composites, so we treat it as relative brightness, not official radiance. |
+| **Ocean temperature order** | ECCO2 colours decoded at known places, averaged over 17 frames | Decoded values (0 = coldest colour, 1 = warmest): West Pacific warm pool 0.89, Arabian Sea 0.90, Gulf Stream 0.58, North Atlantic 0.34, Southern Ocean 0.20. Against typical annual sea surface temperatures (about 29, 27.5, 22, 10 and 1 °C), **9 of 10 pairs are in the right order**; the one miss (warm pool vs Arabian Sea) differs by 0.01. The eastern equatorial Pacific had too few coloured pixels to read. |
+
+Limits: ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). Mingachevir values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.
+
 ### Recordings
 Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac).
 
@@ -37,7 +49,7 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 The start screen has an optional theme song, **"Polyphonic Earth"**, an original composition by our teammate **Ali Aliyev** ([theme.m4a](assets/audio/theme.m4a), 48 s). It plays only when you press its button and fades out as soon as you enter the map, so it never plays over the data.
 
 ### Signature features
-- **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value.
+- **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value. Pause for a moment and the app fetches **live NASA POWER data** for that point (mean air temperature and rainfall) and reads it out.
 - **Stereo map:** in every scene, west sounds on the left and east on the right.
 - **Time Machine:** hear 12 years of human light. The app also *measures* total detected light per year from the NASA frames and charts it.
 - **"What am I hearing?":** a legend that explains every sound layer, plus live descriptions on demand.
@@ -88,11 +100,11 @@ python -m http.server 8123
 Then open http://localhost:8123. A local server is needed because browsers block pixel reads on `file://` pages.
 
 ## Data & credits
-All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization Studio**, via the Earth Information Center collection. Media files here are downscaled copies for web delivery.
-- Global Sea Surface Currents and Temperature (ECCO2): https://svs.gsfc.nasa.gov/3912/
+All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization Studio (SVS)**. Three of them are made for the NASA Earth Information Center (EIC) display; the ocean scene uses a standard SVS visualization. Media files here are downscaled copies for web delivery.
 - Change in Night Lights between 2012 and 2023, EIC Version: https://svs.gsfc.nasa.gov/5313/
-- Lightning Events Detected from the ISS 2017–2023: https://svs.gsfc.nasa.gov/5011/
-- DYAMOND Global Carbon Dioxide: https://svs.gsfc.nasa.gov/5196/
+- Lightning Events Detected from the ISS 2017–2023 (EIC display): https://svs.gsfc.nasa.gov/5011/
+- DYAMOND Global Carbon Dioxide (EIC display): https://svs.gsfc.nasa.gov/5196/
+- Global Sea Surface Currents and Temperature (ECCO2, NASA SVS): https://svs.gsfc.nasa.gov/3912/
 - NASA POWER (MERRA-2) yearly air temperature and rainfall for Mingachevir, and point climatology for Listen by Touch: https://power.larc.nasa.gov/
 - NASA GIBS, MODIS Terra corrected reflectance of the Caspian region (15 July 2023): https://gibs.earthdata.nasa.gov/
 - Caspian sea-level context in the Caspian summary: Chen, J. L. et al. (2017), Long-term Caspian Sea level change, *Geophysical Research Letters*, doi:10.1002/2017GL073958
@@ -103,7 +115,12 @@ All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization 
 **Software:** Tone.js (MIT). Fonts: IBM Plex Sans and IBM Plex Mono (Google Fonts, OFL).
 
 ## Use of AI
-This project was developed with the help of an AI coding assistant (Anthropic Claude). The team directed the concept, data choices, sound design decisions, testing and presentation.
+We used one AI tool, Anthropic Claude, as a coding assistant. The team made the decisions and checked what it produced.
+- **Code:** the assistant wrote most of the HTML, CSS and JavaScript, the Tone.js instruments and the audio quality-check script, following the team's design and sound decisions.
+- **Data work:** it wrote the scripts that sample the NASA frames to calibrate the colour rules, and the measurements in "Does the sound tell the truth?". The team chose the datasets and checked the results against the sources.
+- **Text:** it drafted the README, the interface text and the Azerbaijani, Spanish and Russian translations, which the team reviewed.
+- **Images and music:** the logo and cover were drawn as vector shapes from the team's brief; no image-generation model was used. The theme song is a human composition by Ali Aliyev. All sound in the scenes is synthesised live from the data.
+- **Testing:** the assistant ran automated accessibility and layout checks; the team tested on their own phones and computers.
 
 ## Team
 **Open Guys AI**, NASA Space Apps 2026, Mingachevir local event.

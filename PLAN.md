@@ -19,17 +19,18 @@
 | **Relevance** | All scenes are EIC/SVS visualizations; NASA data is the core of the project. Every scene shows its source and credit. |
 | **Presentation** | 30-second demo video (with sound and English subtitles), a "How it works" section in the README, and a live link. |
 
-**Target global awards:** Art & Technology · Best Use of Data · Most Inspirational · Best Storytelling.
+**Target global awards:** 1) Art & Technology · 2) Best Use of Data · 3) Most Inspirational. The Caspian & Mingachevir scene is our strongest card for the local judges.
 
 ## 3. Product: what we built
 
-### 3.1 Scenes (4 datasets → 4 instrument languages)
+### 3.1 Scenes (5 datasets → 5 instrument languages)
 
 | Scene | NASA source | Visual feature → Sound |
 |---|---|---|
 | 🌊 **Ocean** | [Sea Surface Currents & Temperature](https://svs.gsfc.nasa.gov/3912/) | Temperature colour → sweep melody pitch (warm = high, cold = low, land = silence) · global warmth → pad chord from minor to major · current motion → filter shimmer |
 | 🌃 **Night Lights 2012→2023** | [Change in Night Lights](https://svs.gsfc.nasa.gov/5313/) | **Time Machine** slider across the years · city lights → bells, pitched by latitude · light growth vs 2012 → rising bass drone · Change mode: brighter = rising chimes, darker = falling tones |
 | ⚡ **Lightning (ISS)** | [Lightning Events 2017–2023](https://svs.gsfc.nasa.gov/5011/) | Each slice with flashes → drum hit · distance from equator → drum pitch · longitude → stereo · global storm activity → rain noise |
+| 🇦🇿 **Caspian & Mingachevir** | [NASA POWER](https://power.larc.nasa.gov/) 1981–2024 + NASA GIBS MODIS image | One note per year of measured air temperature in Mingachevir over a drone at the 1980s average · the melody climbs as the region warms (+1.36 °C) |
 | 🏭 **CO₂** | [DYAMOND CO₂](https://svs.gsfc.nasa.gov/5196/) | CO₂ concentration → increasing dissonance (tritone, minor second, cluster) · average level → filter brightness · strong plumes → gritty melody · plume coverage → low haze rumble |
 
 ### 3.2 Features in every scene
@@ -39,7 +40,7 @@
 4. **"What am I hearing?"**: a legend explaining every sound layer, plus `aria-live` descriptions for screen readers.
 
 ### 3.3 Accessibility (required)
-- Everything works with the keyboard alone (Tab, Space, arrow keys, 1–4 to pick a scene).
+- Everything works with the keyboard alone (Tab, Space, arrow keys, 1–5 to pick a scene).
 - `aria-live` descriptions, high contrast, `prefers-reduced-motion` support.
 - Sound safety: volume cap through a limiter, soft start.
 
@@ -65,7 +66,7 @@ README.md           # story, mapping table, credits, AI use
 
 | When | Work |
 |---|---|
-| **Nov 14, evening** | ✅ Data download & preparation · app skeleton · analyzer · audio engine · all 4 scenes · Listen by Touch · README |
+| **Nov 14, evening** | ✅ Data download & preparation · app skeleton · analyzer · audio engine · all 5 scenes · Listen by Touch · README |
 | **Nov 15, morning** | Sound tuning after listening tests · accessibility testing with NVDA · fixes from Issues |
 | **Nov 15, afternoon** | Design polish · deploy to GitHub Pages |
 | **Nov 15, 16:00–20:00** | 30-second demo video · README "Our story" · submission text |
@@ -74,10 +75,11 @@ README.md           # story, mapping table, credits, AI use
 **Cut rule:** if time runs short, polish beats scope. Three polished scenes are better than four rough ones.
 
 ## 6. Presentation (30-second video)
-- 0–5 s: black screen and sound. *"What if you could hear the planet change?"*
-- 5–20 s: quick montage of the 4 scenes, each with its own sound.
-- 20–27 s: blind-user scenario, Listen by Touch.
-- 27–30 s: logo, link, "Powered by NASA EIC data".
+- 0–4 s: black screen and sound. Subtitle: *"2.2 billion people can't see NASA's maps of our planet."*
+- 4–8 s: a hand on the screen, Listen by Touch (footage from the user test if we have it).
+- 8–22 s: the scenes, about 3 s each: Ocean → Night Lights (Time Machine) → Lightning → CO₂ → **Mingachevir (+1.4 °C)**.
+- 22–27 s: the test user's one-sentence quote (subtitled), only with their written consent.
+- 27–30 s: logo, link, "Powered by NASA data". No copyrighted music: only the app's sound and Ali Aliyev's theme.
 - English subtitles (required by the rules).
 
 ## 7. Submission checklist
