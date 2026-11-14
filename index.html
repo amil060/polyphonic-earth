@@ -21,9 +21,9 @@
       <h1 id="intro-title">Polyphonic <span>Earth</span></h1>
       <button id="start" class="play-ring" type="button" aria-describedby="intro-desc">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <span class="sr-only">Start listening</span>
+        <span class="cta-label">Listen to Earth</span>
       </button>
-      <p id="intro-desc" class="intro-line">Press play to hear our planet change</p>
+      <p id="intro-desc" class="intro-line">What if you could hear our planet changing?</p>
       <p class="intro-why">A jukebox that turns NASA's pictures of Earth into music, so anyone, including people who are blind, can explore our changing planet by ear.</p>
       <ol class="intro-steps" aria-label="How it works">
         <li><b>1 · NASA pictures</b><span>Real NASA animations: ocean temperature, city lights at night, lightning and CO₂.</span></li>
@@ -73,6 +73,7 @@
             <span id="readout-label">Now playing</span>
             <strong id="readout-value">—</strong>
             <span id="npm" class="npm"></span>
+            <span id="measured" class="npm measured"></span>
           </div>
         </div>
         <div id="touch-badge" class="badge" hidden>Listen by Touch · arrows or pointer</div>
@@ -156,6 +157,15 @@
     <!-- Below the map: explanation, live description, data source -->
     <section class="info" aria-label="What am I hearing?">
       <div class="info-main">
+        <section class="science" aria-labelledby="sci-title">
+          <h2 id="sci-title">How to read this scene</h2>
+          <ol class="flow">
+            <li><b>NASA data</b><span id="sci-data"></span></li>
+            <li><b>Sound</b><span id="sci-sound"></span></li>
+            <li><b>Meaning</b><span id="sci-meaning"></span></li>
+          </ol>
+          <p class="limits"><b>Limits</b> <span id="sci-limits"></span></p>
+        </section>
         <h2>What am I hearing?</h2>
         <ul id="legend" class="legend"></ul>
       </div>

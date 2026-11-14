@@ -6,9 +6,11 @@ import { ocean } from './scenes/ocean.js';
 import { nightlights, YEARS } from './scenes/nightlights.js';
 import { lightning } from './scenes/lightning.js';
 import { co2 } from './scenes/co2.js';
+import { caspian } from './scenes/caspian.js';
+import { climateAt } from './power.js';
 import { icon } from './icons.js';
 
-const SCENES = [ocean, nightlights, lightning, co2];
+const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
 
 const $ = (id) => document.getElementById(id);
@@ -168,20 +170,24 @@ async function selectScene(i) {
   applyScale();
   hideCallout();
   $('scene-listen').textContent = LISTEN[s.id];
+  for (const k of ['data', 'sound', 'meaning', 'limits']) $(`sci-${k}`).textContent = SCIENCE[s.id][k];
   el.readoutValue.textContent = '—';
   state.layers = new Set();
   renderLayers();
-  el.frame.style.setProperty('--ar', s === ocean || s === lightning ? '2' : String(16 / 9));
+  el.frame.style.setProperty('--ar', s === ocean || s === lightning ? '2' : s === caspian ? '1' : String(16 / 9));
+  $('measured').textContent = '';
   if (s.media.type === 'video') {
     el.still.hidden = true; el.video.hidden = false;
     el.video.src = s.media.src;
   } else {
     el.video.pause(); el.video.removeAttribute('src'); el.video.load();
     el.video.hidden = true; el.still.hidden = false;
-    showYear(state.yearIndex);
-    measureYears();
+    el.still.classList.toggle('boost', s === nightlights); // night-lights frames are very dark
+    if (s === nightlights) { showYear(state.yearIndex); measureYears(); }
+    else el.still.src = s.media.src;
   }
   analyzer.ready = false;
+  if (s.series) s.load().then(() => { if (state.scene === s) setLive(s.describe()); });
   if (engine.started) {
     s.build(engine);
     Tone.getContext().transport.bpm.value = s.bpm;
@@ -194,6 +200,15 @@ async function selectScene(i) {
 setInterval(() => {
   const s = state.scene;
   if (!s) return;
+  if (s.series) { // data-series scene: columns come from the data, not from pixels
+    if (s.data) {
+      state.cols = s.columns(STEPS);
+      state.stats = s.stats();
+      analyzer.ready = true;
+      if (!state.touch) updateReadout();
+    }
+    return;
+  }
   const m = currentMedia();
   const ok = m === el.video ? m.readyState >= 2 : m.complete && m.naturalWidth > 0;
   if (!ok) return;
@@ -211,6 +226,7 @@ const SCALE_UI = { // gradients run top (high value) → bottom (low value), sam
   change: { grad: ['#a855f7', '#e9d5ff', '#ffffff', '#fdba74', '#f97316'], top: ['Brighter', 'rising chimes'], bottom: ['Darker', 'falling tones'] },
   lightning: { grad: ['#e9f04a', '#8f9a28', '#3a3a3a'], top: ['Many flashes', 'hard drum hits'], bottom: ['No flashes', 'silence'] },
   co2: { grad: ['#e11d1d', '#e8651e', '#e6a04a', '#d8c08a'], top: ['High CO₂', 'tense, bright'], bottom: ['Background', 'calm'] },
+  caspian: { grad: ['#ef4444', '#f59e0b', '#a3e635', '#22d3ee', '#3b82f6'], top: ['Warmest year', 'highest note'], bottom: ['Coolest year', 'lowest note'] },
 };
 function applyScale() {
   const s = state.scene;
@@ -225,6 +241,41 @@ const LISTEN = {
   nightlights: 'Louder, higher bell = brighter city · the drone rises as the world gets brighter · left ear = the Americas',
   lightning: 'Each drum hit = lightning · deep boom = tropical storm · higher drum = far from the equator',
   co2: 'Higher note = more CO₂ · the chord shimmers and beats as CO₂ rises · rumble = how much is covered',
+  caspian: 'One note = one year in Mingachevir · higher = warmer · the low drone is the 1980s average',
+};
+
+// Data → sound → meaning, plus honest limits, for every scene (Best Use of Science).
+const SCIENCE = {
+  ocean: {
+    data: 'ECCO2 ocean model: sea surface temperature drawn as a colour scale from blue (cold) to red (warm).',
+    sound: 'Each of 8 map slices plays one note. Pitch follows the slice’s average colour on a 3-octave quarter-tone scale.',
+    meaning: 'Higher note = warmer water in that slice. Left ear = west, right ear = east. A knock = mostly land.',
+    limits: 'Values are read back from the visualization colours, so they are relative (0–100 % of the scale), not degrees. One note summarises a whole slice. Use Listen by Touch to see NASA POWER’s measured air temperature for a point.',
+  },
+  nightlights: {
+    data: 'VIIRS Black Marble: night-time light seen from orbit, one global frame per year, 2012–2023.',
+    sound: 'Bells ring for lit pixels in each slice; louder and higher means more light. A drone follows total light versus 2012.',
+    meaning: 'More bells, higher drone = a brighter, more lit-up world. Change mode: rising chimes = brighter, falling tones = darker.',
+    limits: '“Light versus 2012” is measured by this app from the image pixels, not NASA’s official radiance. LED changes and cloud screening affect brightness.',
+  },
+  lightning: {
+    data: 'ISS Lightning Imaging Sensor (2017–2023): each yellow dot is a detected flash.',
+    sound: 'A slice with flashes hits a drum; drum pitch follows distance from the equator. Rain swells with global activity.',
+    meaning: 'Busy drums = many storms. Deep booms = tropical storms. Where the drums sit in stereo shows which continent.',
+    limits: 'We count flash pixels in the animation, not individual flashes. The ISS only sees between about 52° N and 52° S.',
+  },
+  co2: {
+    data: 'DYAMOND GEOS model: carbon dioxide plumes over North America, tan (lower) to red (higher).',
+    sound: 'A calm chord whose two voices drift apart in cents as CO₂ rises, so the chord beats; a melody traces strong plumes.',
+    meaning: 'A shimmering, tense chord = more CO₂ in view. A calm chord = background levels.',
+    limits: 'Concentrations are relative to the visualization colour scale, not ppm. The camera moves, so the view is not a fixed region.',
+  },
+  caspian: {
+    data: 'NASA POWER (MERRA-2): yearly mean air temperature and rainfall for Mingachevir, Azerbaijan, 1981–2024. Image: NASA GIBS MODIS.',
+    sound: 'One note per year in order. Pitch = that year’s temperature between the coolest and warmest year. A drone holds the 1981–1990 average.',
+    meaning: 'When the melody sits above the drone, the year was warmer than the 1980s. Hear the line climb across four decades.',
+    limits: 'POWER values are model-based reanalysis on a 0.5° × 0.625° grid, so they describe the area around Mingachevir, not one weather station.',
+  },
 };
 
 function showCallout(kind) {
@@ -260,7 +311,10 @@ function updateReadout() {
   const s = state.scene;
   if (state.refStep < REF_STEPS) return; // the sound legend owns the marker for one bar
   setMark(s === lightning ? clamp01(state.stats.coverage * 40) : state.stats.coverage > 0 ? state.stats.mean : null);
-  if (s === nightlights && nightlights.mode === 'year') {
+  if (s.readout) {
+    const r = s.readout();
+    if (r) { el.readoutLabel.textContent = r.label; el.readoutValue.textContent = r.value; }
+  } else if (s === nightlights && nightlights.mode === 'year') {
     el.readoutLabel.textContent = 'Light vs 2012';
     const g = (nightlights.growth(state.stats) - 1) * 100;
     tween('readout', g, (v) => { const r = Math.round(v); el.readoutValue.textContent = `${r >= 0 ? '+' : ''}${r}%`; });
@@ -306,7 +360,7 @@ function ensureLoop() {
         s.layers.slice(0, want).forEach((l) => state.layers.add(l.id));
         if (state.layers.size !== before) {
           const added = s.layers[want - 1].label;
-          Tone.getContext().draw.schedule(() => { renderLayers(); el.probeLive.textContent = `${added} joins.`; }, time);
+          Tone.getContext().draw.schedule(() => { renderLayers(); if (!state.touch) el.probeLive.textContent = `${added} joins.`; }, time);
         }
       }
       s.onBar(state.stats, time, layerOn);
@@ -414,14 +468,36 @@ function setTouch(on) {
   }
 }
 
-function geoText(s, fx, fy) {
-  if (!s.geo) return '';
+function latLon(s, fx, fy) {
+  if (!s.geo) return null;
   const lat = s.geo.latTop - fy * (s.geo.latTop - s.geo.latBottom);
-  let lon = s.geo.lon0 + fx * 360;
+  let lon = s.geo.lon0 + fx * (s.geo.lonSpan || 360);
   lon = ((lon + 540) % 360) - 180;
-  const la = `${Math.abs(Math.round(lat))}°${lat >= 0 ? 'N' : 'S'}`;
-  const lo = `${Math.abs(Math.round(lon))}°${lon >= 0 ? 'E' : 'W'}`;
-  return `about ${la}, ${lo}: `;
+  return { lat, lon };
+}
+const fmtLatLon = ({ lat, lon }) =>
+  `${Math.abs(Math.round(lat))}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(Math.round(lon))}°${lon >= 0 ? 'E' : 'W'}`;
+function geoText(s, fx, fy) {
+  const g = latLon(s, fx, fy);
+  return g ? `about ${fmtLatLon(g)}: ` : '';
+}
+
+// After the cursor rests, fetch the real NASA POWER value for that spot and say it.
+let measureTimer = 0;
+function measureHere(s, fx, fy) {
+  clearTimeout(measureTimer);
+  const g = latLon(s, fx, fy);
+  if (!g) { $('measured').textContent = ''; return; }
+  measureTimer = setTimeout(async () => {
+    $('measured').textContent = 'NASA POWER: loading…';
+    const c = await climateAt(g.lat, g.lon);
+    if (state.scene !== s || !state.touch) return;
+    if (!c) { $('measured').textContent = 'NASA POWER unavailable offline'; return; }
+    const msg = `${c.t2m.toFixed(1)} °C air, ${c.precip.toFixed(1)} mm rain/day`;
+    $('measured').textContent = `NASA POWER: ${msg}`;
+    el.probeLive.textContent = `Measured by NASA POWER near ${fmtLatLon(c)}: average ${msg} (1981–2020).`;
+    if (s.series) engine.playProbe(clamp01((c.t2m + 5) / 35), fx, s); // sound the measured temperature
+  }, 450);
 }
 
 function probe(force = false) {
@@ -431,16 +507,17 @@ function probe(force = false) {
   if (!force && now - state.lastProbe < 70) return;
   state.lastProbe = now;
   const { x, y } = state.cursor;
-  const v = analyzer.valueAt(x, y);
-  engine.playProbe(v, x, s);
+  const v = s.series ? null : analyzer.valueAt(x, y);
+  if (!s.series) engine.playProbe(v, x, s);
   setMark(v);
-  const text = `${geoText(s, x, y)}${s.label(v)}${v == null ? '' : `, ${Math.round(v * 100)}%`}`;
+  const text = `${geoText(s, x, y)}${s.label(v)}${v == null ? '' : `, ${Math.round(v * 100)}% on the colour scale`}`;
   el.readoutLabel.textContent = 'Under cursor';
   el.readoutValue.textContent = v == null ? '—' : `${Math.round(v * 100)}%`;
   if (force || now - state.lastAnnounce > 600) {
     state.lastAnnounce = now;
     el.probeLive.textContent = text;
   }
+  measureHere(s, x, y);
 }
 
 el.stage.addEventListener('pointermove', (e) => {
@@ -533,7 +610,8 @@ requestAnimationFrame(draw);
 // "What is this?" reopens the start screen; once sound is running, its play button just closes it.
 $('about-btn').addEventListener('click', () => {
   el.intro.hidden = false;
-  $('intro-desc').textContent = engine.started ? 'Press play to go back to the map' : 'Press play to hear our planet change';
+  $('intro-desc').textContent = 'What if you could hear our planet changing?';
+  el.start.querySelector('.cta-label').textContent = engine.started ? 'Back to the map' : 'Listen to Earth';
   el.start.focus();
 });
 el.start.addEventListener('click', async () => {
@@ -545,7 +623,7 @@ el.start.addEventListener('click', async () => {
     return;
   }
   el.start.disabled = true;
-  el.start.querySelector('.sr-only').textContent = 'Loading sounds';
+  el.start.querySelector('.cta-label').textContent = 'Loading sounds…';
   $('intro-desc').textContent = 'Loading sounds…';
   try {
     await engine.start();
@@ -663,12 +741,9 @@ function logNote(col, str, now) {
   list.querySelector('.log-empty')?.remove();
   const secs = Math.max(0, Math.floor((now - (state.playStart || now)) / 1000));
   const t = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
-  let where = `slice ${col.index + 1}/16`;
-  if (s.geo) {
-    let lon = s.geo.lon0 + col.x * 360; lon = ((lon + 540) % 360) - 180;
-    const lat = s.geo.latTop - col.lat * (s.geo.latTop - s.geo.latBottom);
-    where = `${Math.abs(Math.round(lat))}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(Math.round(lon))}°${lon >= 0 ? 'E' : 'W'}`;
-  }
+  let where = `slice ${col.index + 1}/${STEPS}`;
+  if (col.year) where = `${col.year} · ${col.t.toFixed(1)} °C`;
+  else if (s.geo) where = fmtLatLon(latLon(s, col.x, col.lat)).replace(',', '');
   const li = document.createElement('li');
   li.innerHTML = `<span>${t}</span><span class="n">♪</span><span>${where} · ${s.label(col.mean)} · ${Math.round(str * 100)}%</span>`;
   list.prepend(li);

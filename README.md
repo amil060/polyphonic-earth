@@ -49,9 +49,9 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 ```
 NASA frame (video/image) ──► hidden <canvas> 192×96 ──► pixel → data value (scene colour rules)
         │                                                   │
-        │                                   16 west→east slices: mean, coverage, peak, latitude
+        │                                    8 west→east slices: mean, coverage, peak, latitude
         ▼                                                   ▼
-   on-screen visual                     Tone.js transport (16 steps per bar)
+   on-screen visual                     Tone.js transport (8 steps per bar) 
    + sweep overlay                      onStep → note (pitch=value, loudness=coverage, pan=x)
                                         onBar  → chords / drones / textures from global stats
 ```
