@@ -23,6 +23,15 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 | ⚡ **Lightning** | ISS Lightning Imaging Sensor 2017–2023 | Every slice with flashes hits a drum. Tropical storms boom low, storms far from the equator sound higher. Rain noise swells with global storm activity. |
 | 🏭 **CO₂** | DYAMOND GEOS carbon dioxide | A calm chord gains tritones and clashing seconds as CO₂ plumes intensify. The filter opens with concentration, and a gritty melody traces strong plumes. |
 
+### How the music works
+- **Sound legend first.** Every scene opens by playing its lowest and its highest value once, like the axis of a chart, while a marker moves on the colour scale. Then the music starts.
+- **One layer at a time.** The melody plays alone, and harmony, bass and texture join every two bars. Each layer can be switched on or off.
+- **A slow sweep.** Eight west-to-east slices per bar, long ambient notes, and a soft knock for slices with no data (land, in the ocean scene).
+- **Microtonal maqam tuning.** Notes use quarter-tone maqam scales (Rast, Saba, Hijaz). The value picks a scale degree and the remainder bends the note by up to ±25 cents, so small differences in the data stay audible. In the CO₂ scene two copies of the chord drift apart in cents as concentration rises, and you hear them beat.
+
+### Recordings
+Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac).
+
 ### Signature features
 - **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value.
 - **Stereo map:** in every scene, west sounds on the left and east on the right.

@@ -9,7 +9,7 @@ import { co2 } from './scenes/co2.js';
 import { icon } from './icons.js';
 
 const SCENES = [ocean, nightlights, lightning, co2];
-const STEPS = 16;
+const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
 
 const $ = (id) => document.getElementById(id);
 const el = {
@@ -152,6 +152,7 @@ async function selectScene(i) {
   if (state.scene?.nodes) retire(state.scene);
   state.scene = s;
   state.step = -1; state.bar = 0;
+  state.needsIntro = true;
 
   document.documentElement.style.setProperty('--accent', s.accent);
   SCENES.forEach((x) => $(`tab-${x.id}`).setAttribute('aria-selected', String(x === s)));
@@ -165,6 +166,8 @@ async function selectScene(i) {
   el.tm.hidden = s !== nightlights;
   el.sparkWrap.hidden = s !== nightlights;
   applyScale();
+  state.layers = new Set();
+  renderLayers();
   el.frame.style.setProperty('--ar', s === ocean || s === lightning ? '2' : String(16 / 9));
   if (s.media.type === 'video') {
     el.still.hidden = true; el.video.hidden = false;
@@ -221,6 +224,7 @@ function setMark(v) {
 
 function updateReadout() {
   const s = state.scene;
+  if (state.refStep < REF_STEPS) return; // the sound legend owns the marker for one bar
   setMark(s === lightning ? clamp01(state.stats.coverage * 40) : state.stats.coverage > 0 ? state.stats.mean : null);
   if (s === nightlights && nightlights.mode === 'year') {
     el.readoutLabel.textContent = 'Light vs 2012';
@@ -241,17 +245,42 @@ function ensureLoop() {
   state.loop = new Tone.Loop((time) => {
     const s = state.scene;
     if (!s?.nodes || !analyzer.ready) return;
+
+    // Sound legend: before the music, play the lowest and the highest value once,
+    // like the axis of a chart, while the scale marker shows where each sits.
+    if (state.refStep < REF_STEPS) {
+      const k = state.refStep++;
+      if (k === 0) {
+        s.reference(0, time);
+        Tone.Draw.schedule(() => { setMark(0); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`); }, time);
+      } else if (k === 4) {
+        s.reference(1, time);
+        Tone.Draw.schedule(() => { setMark(1); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`); }, time);
+      }
+      return;
+    }
+
     state.step = (state.step + 1) % STEPS;
     if (state.step === 0) {
       state.bar++;
-      s.onBar(state.stats, time);
+      // Layers enter one at a time: melody alone, then harmony, bass and texture every two bars.
+      if (!state.layerManual) {
+        const want = Math.min(s.layers.length, 1 + Math.floor((state.bar - 1) / 2));
+        const before = state.layers.size;
+        s.layers.slice(0, want).forEach((l) => state.layers.add(l.id));
+        if (state.layers.size !== before) {
+          const added = s.layers[want - 1].label;
+          Tone.Draw.schedule(() => { renderLayers(); el.probeLive.textContent = `${added} joins.`; }, time);
+        }
+      }
+      s.onBar(state.stats, time, layerOn);
       if (s === nightlights && el.autoyear.checked && state.bar % 2 === 0) {
         Tone.Draw.schedule(() => showYear(state.yearIndex + 1), time);
       }
       if (state.bar % 8 === 1) Tone.Draw.schedule(() => describeNow(), time);
     }
     const col = state.cols[state.step];
-    const hit = col ? s.onStep(col, time, state.step) : 0;
+    const hit = col ? s.onStep(col, time, layerOn, engine) : 0;
     Tone.Draw.schedule(() => {
       if (hit) addRipple(col.x, col.lat, hit, col);
       pushTrace(hit || 0);
@@ -259,12 +288,46 @@ function ensureLoop() {
     }, time);
     const step = state.step;
     Tone.Draw.schedule(() => { state.drawStep = step; }, time);
-  }, '16n').start(0);
+  }, '8n').start(0);
 }
+
+// ---------- Layers ----------
+const REF_STEPS = 8; // one bar of sound legend: low note on step 0, high note on step 4
+state.layers = new Set();
+state.refStep = REF_STEPS;
+state.needsIntro = true;
+state.layerManual = false;
+const layerOn = (id) => state.layers.has(id);
+
+function startIntro() {
+  state.refStep = 0;
+  state.step = -1;
+  state.bar = 0;
+  state.layerManual = false;
+  state.layers = new Set();
+  renderLayers();
+}
+
+function renderLayers() {
+  const box = $('layers');
+  const s = state.scene;
+  if (!box || !s) return;
+  box.innerHTML = '<span class="layers-label" aria-hidden="true">Layers</span>' + s.layers.map((l) =>
+    `<button type="button" class="chip" data-layer="${l.id}" aria-pressed="${state.layers.has(l.id)}">${l.label}</button>`).join('');
+}
+$('layers')?.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-layer]');
+  if (!b) return;
+  const id = b.dataset.layer;
+  state.layerManual = true;
+  if (state.layers.has(id)) state.layers.delete(id); else state.layers.add(id);
+  b.setAttribute('aria-pressed', String(state.layers.has(id)));
+});
 
 function play() {
   if (!engine.started || !state.scene) return;
   if (!state.scene.nodes) state.scene.build(engine);
+  if (state.needsIntro) { startIntro(); state.needsIntro = false; }
   ensureLoop();
   Tone.Transport.start('+0.05');
   if (state.scene.media.type === 'video') el.video.play().catch(() => {});

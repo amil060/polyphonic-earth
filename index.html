@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230b1530' stroke='%2367e8f9' stroke-width='2'/%3E%3Cpath d='M6 17c3-6 5 6 8 0s5 6 8 0 4 4 4 4' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <a class="skip" href="#stage">Skip to the visualization</a>
@@ -17,6 +17,7 @@
   <!-- Start gate: one play button (audio needs a user gesture). The live map shows through behind it. -->
   <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" aria-describedby="intro-desc">
     <div class="intro-card">
+      <svg aria-hidden="true" viewBox="0 0 120 160" class="logo logo-xl"><path class="logo-staff" d="M12 40H108M12 52H108M12 64H108M12 76H108M12 88H108"/><circle class="logo-earth" cx="70" cy="64" r="26"/><path class="logo-bands" d="M44 52H96M44 64H96M44 76H96"/><path class="logo-clef" d="M44 34C44 20 58 16 61 26C63 33 52 36 44 44V136C44 150 26 153 22 143C19 135 28 130 33 135"/><circle class="logo-dot" cx="29" cy="139" r="6"/></svg>
       <h1 id="intro-title">Polyphonic <span>Earth</span></h1>
       <button id="start" class="play-ring" type="button" aria-describedby="intro-desc">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -29,7 +30,7 @@
 
   <header class="top">
     <div class="brand">
-      <svg aria-hidden="true" viewBox="0 0 32 32" class="logo"><circle cx="16" cy="16" r="13"/><path d="M6 17c3-6 5 6 8 0s5 6 8 0 4 4 4 4"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 120 160" class="logo"><path class="logo-staff" d="M12 40H108M12 52H108M12 64H108M12 76H108M12 88H108"/><circle class="logo-earth" cx="70" cy="64" r="26"/><path class="logo-bands" d="M44 52H96M44 64H96M44 76H96"/><path class="logo-clef" d="M44 34C44 20 58 16 61 26C63 33 52 36 44 44V136C44 150 26 153 22 143C19 135 28 130 33 135"/><circle class="logo-dot" cx="29" cy="139" r="6"/></svg>
       <div>
         <p class="brand-name">Polyphonic Earth</p>
         <p class="brand-sub">An Earth Jukebox · NASA EIC data, sonified live</p>
@@ -113,6 +114,7 @@
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
               Describe <kbd>D</kbd>
             </button>
+            <div id="layers" class="layers" role="group" aria-label="Sound layers: switch each one on or off"></div>
             <label class="vol">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6"/></svg>
               <span class="sr-only">Volume</span>
@@ -150,12 +152,21 @@
           <p id="tm-help" class="muted small">Use <kbd>[</kbd> and <kbd>]</kbd> to step years. The last stop, "Change", plays what grew brighter (purple) and darker (orange) between 2012 and 2023.</p>
         </figure>
 
+        <h3>Recordings</h3>
+        <p class="small muted">Each scene rendered by the app as lossless FLAC, sound legend and layer intro included.</p>
+        <ul class="recs">
+          <li><span>Ocean</span><audio controls preload="none" src="assets/audio/ocean.flac"></audio><a href="assets/audio/ocean.flac" download>FLAC</a></li>
+          <li><span>Night lights</span><audio controls preload="none" src="assets/audio/nightlights.flac"></audio><a href="assets/audio/nightlights.flac" download>FLAC</a></li>
+          <li><span>Lightning</span><audio controls preload="none" src="assets/audio/lightning.flac"></audio><a href="assets/audio/lightning.flac" download>FLAC</a></li>
+          <li><span>CO₂</span><audio controls preload="none" src="assets/audio/co2.flac"></audio><a href="assets/audio/co2.flac" download>FLAC</a></li>
+        </ul>
+
         <h3>Data source</h3>
         <p id="credit" class="small"></p>
 
         <details class="how">
           <summary>How the sonification works</summary>
-          <p class="small">Each frame of the NASA visualization is drawn into a hidden canvas and analysed pixel by pixel (192 × 96 grid). The pixel colours are converted back into data values using the visualization's own colour scale. A sweep moves from west to east once per bar. Each of the 16 slices of the map becomes a note: its value sets the pitch, how much of it contains data sets the loudness, and its position sets the stereo pan. Every note is snapped to a musical scale so the result is music, not noise. Silence means there is no data, for example land in the ocean scene.</p>
+          <p class="small">Each frame of the NASA visualization is drawn into a hidden canvas and analysed pixel by pixel (192 × 96 grid). The pixel colours are converted back into data values using the visualization's own colour scale. Before the music starts, a sound legend plays the lowest and the highest value once, like the axis of a chart. A slow sweep then moves from west to east once per bar. Each of the 8 slices of the map becomes a note: its value sets the pitch, how much of it contains data sets the loudness, and its position sets the stereo pan. The layers enter one at a time, and you can switch each one on or off. Notes use quarter-tone maqam scales (Rast, Saba, Hijaz): the value picks a scale degree and what is left over bends the note by up to 25 cents, so small differences in the data stay audible. In the CO₂ scene the chord's two voices drift apart in cents as concentration rises, and you hear them beat. A soft knock marks a slice with no data, for example land in the ocean scene.</p>
         </details>
       </div>
     </section>

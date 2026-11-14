@@ -1,8 +1,6 @@
-// 🏭 Carbon Dioxide — DYAMOND / GEOS global CO₂ simulation (NASA SVS #5196)
+// Carbon Dioxide — DYAMOND / GEOS global CO₂ simulation (NASA SVS #5196)
 /* global Tone */
-import { SCALES, quantize, midiToNote, panOf, clamp01 } from '../engine.js';
-
-const BASE = ['C3', 'G3', 'E4'];
+import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js';
 
 export const co2 = {
   id: 'co2',
@@ -18,13 +16,20 @@ export const co2 = {
     text: 'NASA/Goddard Space Flight Center Scientific Visualization Studio: "DYAMOND Global Carbon Dioxide" (GEOS model)',
     url: 'https://svs.gsfc.nasa.gov/5196/',
   },
-  probeScale: SCALES.minorPent,
-  probeBase: 48,
-  bpm: 70,
+  scale: MAQAM.hijaz,
+  base: 50,
+  bpm: 60,
+  refLabels: ['background CO₂', 'a strong CO₂ plume'],
+  layers: [
+    { id: 'melody', label: 'Melody' },
+    { id: 'harmony', label: 'Harmony' },
+    { id: 'bass', label: 'Bass' },
+    { id: 'texture', label: 'Haze' },
+  ],
   legend: [
-    { ico: 'music', title: 'Harmony: CO₂ level', text: 'Low CO₂ gives a calm, open chord. As more of the view turns orange and red, clashing notes join and the harmony gets tense.' },
+    { ico: 'music', title: 'Harmony: CO₂ level', text: 'Low CO₂ gives a calm, open chord. As plumes grow, its notes drift a few cents apart and start to beat against each other, so the chord shimmers and grows tense.' },
     { ico: 'sliders', title: 'Brightness: concentration', text: 'Higher average CO₂ opens the filter, so the sound gets brighter and harsher.' },
-    { ico: 'lines', title: 'Sweep melody: plumes', text: 'Strong plumes play a gritty melody as the sweep crosses them, panned left to right.' },
+    { ico: 'lines', title: 'Melody: plumes', text: 'Each slice with CO₂ plays a slow note as the sweep crosses it: higher for stronger plumes, panned left to right.' },
     { ico: 'fog', title: 'Haze: plume coverage', text: 'A low rumble grows as the plume spreads across more of the view.' },
   ],
 
@@ -46,49 +51,55 @@ export const co2 = {
   build(engine) {
     const n = (this.nodes = {});
     n.filter = new Tone.Filter(600, 'lowpass').connect(engine.bus);
-    n.pad = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'fatsawtooth', count: 3, spread: 25 },
-      envelope: { attack: 1.5, decay: 1, sustain: 0.7, release: 2.5 },
-      volume: -26,
-    }).connect(n.filter);
+    // Two copies of the same chord; the second drifts away in cents as CO₂ rises (microtonal beating).
+    n.padA = new Tone.PolySynth(Tone.AMSynth, { envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 }, volume: -25 }).connect(n.filter);
+    n.padB = new Tone.PolySynth(Tone.AMSynth, { envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 }, volume: -25 }).connect(n.filter);
     n.pan = new Tone.Panner(0).connect(engine.bus);
+    n.vib = new Tone.Vibrato(5, 0.15).connect(n.pan);
     n.lead = new Tone.MonoSynth({
-      oscillator: { type: 'sawtooth' },
-      envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.4 },
-      filterEnvelope: { attack: 0.005, decay: 0.25, sustain: 0.2, baseFrequency: 400, octaves: 3 },
-      volume: -18,
-    }).connect(n.pan);
+      oscillator: { type: 'triangle' }, portamento: 0.15,
+      envelope: { attack: 0.08, decay: 0.5, sustain: 0.3, release: 2 },
+      filterEnvelope: { attack: 0.05, decay: 0.4, sustain: 0.4, baseFrequency: 500, octaves: 2.5 },
+      volume: -10,
+    }).connect(n.vib);
+    n.bass = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 }, volume: -28 }).connect(engine.bus);
     n.hazeGain = new Tone.Gain(0).connect(engine.bus);
     n.hazeFilter = new Tone.Filter(350, 'lowpass').connect(n.hazeGain);
-    n.haze = new Tone.Noise('brown').connect(n.hazeFilter);
-    n.haze.start();
+    n.haze = new Tone.Noise('brown').connect(n.hazeFilter).start();
   },
 
-  onBar(stats, time) {
-    const m = stats.mean;
-    const chord = [...BASE];
-    if (m > 0.3) chord.push('F#4');   // tritone
-    if (m > 0.4) chord.push('C#4');   // minor second clash
-    if (m > 0.5) chord.push('B3');    // dense cluster
-    this.nodes.pad.triggerAttackRelease(chord, '1m', time, 0.6);
-    this.nodes.filter.frequency.rampTo(350 + Math.pow(clamp01(m), 1.5) * 3800, 1.2, time);
-    this.nodes.hazeGain.gain.rampTo(clamp01(stats.coverage * 1.4) * 0.35, 1.5, time);
+  reference(v, time) {
+    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.lead.triggerAttackRelease(micro(v, this.scale, this.base), '2n', time, 0.7);
   },
 
-  onStep(col, time) {
-    if (col.coverage < 0.1 || col.mean < 0.33) return;
-    const midi = quantize(col.mean, SCALES.minorPent, 52, 2);
+  onBar(stats, time, on) {
+    const n = this.nodes;
+    const m = clamp01(stats.mean);
+    if (on('harmony')) {
+      const chord = microChord(0, [0, 2, 4], MAQAM.rast, 48);
+      const drift = Math.pow(2, (m * 45) / 1200); // up to 45 cents apart → audible beating
+      n.padA.triggerAttackRelease(chord, '1m', time, 0.5);
+      n.padB.triggerAttackRelease(chord.map((f) => f * drift), '1m', time, 0.5);
+    }
+    if (on('bass')) n.bass.triggerAttackRelease(microChord(0, [0], MAQAM.rast, 36)[0], '1m', time, 0.6);
+    n.filter.frequency.rampTo(350 + Math.pow(m, 1.5) * 3800, 1.2, time);
+    n.hazeGain.gain.rampTo(on('texture') ? clamp01(stats.coverage * 1.4) * 0.12 : 0, 1.5, time);
+  },
+
+  onStep(col, time, on) {
+    if (!on('melody') || col.coverage < 0.05) return 0;
     this.nodes.pan.pan.setValueAtTime(panOf(col.x), time);
     const vel = 0.3 + col.mean * 0.5;
-    this.nodes.lead.triggerAttackRelease(midiToNote(midi), '16n', time, vel);
+    this.nodes.lead.triggerAttackRelease(micro(col.mean, this.scale, this.base), '4n', time, vel);
     return vel;
   },
 
   describe(stats, cols) {
-    const hot = cols.filter((c) => c.coverage > 0.1 && c.mean > 0.33).length;
+    const hot = cols.filter((c) => c.coverage > 0.05 && c.mean > 0.33).length;
     const tension = stats.mean > 0.5 ? 'very tense' : stats.mean > 0.4 ? 'tense' : stats.mean > 0.3 ? 'slightly uneasy' : 'calm';
     return `Carbon dioxide. ${Math.round(stats.coverage * 100)}% of the view is covered by plume; average level is ${this.label(stats.mean)}. ` +
-      `The harmony is ${tension}. ${hot} of 16 slices contain strong plumes and play the gritty melody.`;
+      `The harmony is ${tension}. ${hot} of ${cols.length} slices contain strong plumes and play the melody.`;
   },
 
   dispose() {

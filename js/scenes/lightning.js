@@ -1,6 +1,6 @@
-// ⚡ Lightning — flashes detected by LIS on the International Space Station (NASA SVS #5011)
+// Lightning — flashes detected by LIS on the International Space Station (NASA SVS #5011)
 /* global Tone */
-import { SCALES, quantize, midiToNote, panOf, clamp01 } from '../engine.js';
+import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js';
 
 export const lightning = {
   id: 'lightning',
@@ -16,14 +16,21 @@ export const lightning = {
     text: 'NASA/Goddard Space Flight Center Scientific Visualization Studio: "Lightning Events Detected from the International Space Station (ISS) 2017–2023" (LIS data)',
     url: 'https://svs.gsfc.nasa.gov/5011/',
   },
-  probeScale: SCALES.minorPent,
-  probeBase: 45,
-  bpm: 100,
+  scale: MAQAM.saba,
+  base: 33,
+  bpm: 76,
+  refLabels: ['a storm on the equator', 'a storm far from the equator'],
+  layers: [
+    { id: 'melody', label: 'Drums' },
+    { id: 'harmony', label: 'Storm chord' },
+    { id: 'bass', label: 'Thunder' },
+    { id: 'texture', label: 'Rain' },
+  ],
   legend: [
-    { ico: 'disc', title: 'Drums: lightning flashes', text: 'Each slice with flashes hits a drum. More flashes make harder hits.' },
+    { ico: 'disc', title: 'Drums: lightning flashes', text: 'Each slice with flashes hits a deep drum. More flashes make harder hits.' },
     { ico: 'globe', title: 'Drum pitch: latitude', text: 'Tropical storms near the equator boom low. Storms far from the equator sound higher.' },
     { ico: 'headphones', title: 'Stereo: longitude', text: 'Thunder moves from the Americas (left) across Africa to Asia (right).' },
-    { ico: 'rain', title: 'Rain: global storm activity', text: 'The rain noise swells when more of the planet is flashing.' },
+    { ico: 'rain', title: 'Rain and thunder: storm activity', text: 'Rain swells and distant thunder rolls when more of the planet is flashing.' },
   ],
 
   value(r, g, b) {
@@ -40,39 +47,51 @@ export const lightning = {
 
   build(engine) {
     const n = (this.nodes = {});
-    n.pan = new Tone.Panner(0).connect(engine.master);
-    n.panWet = new Tone.Gain(0.35).connect(engine.bus);
-    n.pan.connect(n.panWet);
+    n.pan = new Tone.Panner(0).connect(engine.bus);
     n.drum = new Tone.MembraneSynth({
-      pitchDecay: 0.06, octaves: 5,
-      envelope: { attack: 0.001, decay: 0.45, sustain: 0, release: 0.3 },
-      volume: -9,
+      pitchDecay: 0.08, octaves: 4,
+      envelope: { attack: 0.002, decay: 0.9, sustain: 0, release: 0.8 },
+      volume: -8,
     }).connect(n.pan);
-    n.crackHp = new Tone.Filter(2500, 'highpass').connect(n.pan);
-    n.crack = new Tone.NoiseSynth({
-      noise: { type: 'white' },
-      envelope: { attack: 0.001, decay: 0.09, sustain: 0 },
-      volume: -24,
-    }).connect(n.crackHp);
+    n.padFilter = new Tone.Filter(900, 'lowpass').connect(engine.bus);
+    n.pad = new Tone.PolySynth(Tone.AMSynth, {
+      envelope: { attack: 3, decay: 1, sustain: 0.8, release: 5 },
+      volume: -26,
+    }).connect(n.padFilter);
+    n.thunderGain = new Tone.Gain(0).connect(engine.bus);
+    n.thunderFilter = new Tone.Filter(160, 'lowpass').connect(n.thunderGain);
+    n.thunder = new Tone.Noise('brown').connect(n.thunderFilter).start();
     n.rainGain = new Tone.Gain(0).connect(engine.bus);
     n.rainFilter = new Tone.Filter({ type: 'bandpass', frequency: 1400, Q: 0.6 }).connect(n.rainGain);
-    n.rain = new Tone.Noise('pink').connect(n.rainFilter);
-    n.rain.start();
+    n.rain = new Tone.Noise('pink').connect(n.rainFilter).start();
   },
 
-  onBar(stats, time) {
-    this.nodes.rainGain.gain.rampTo(clamp01(stats.coverage * 60) * 0.22, 1.5, time);
+  reference(v, time) {
+    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.drum.triggerAttackRelease(micro(v, this.scale, this.base), '4n', time, 0.8);
   },
 
-  onStep(col, time) {
-    if (col.coverage < 0.0015) return;
-    const { pan, drum, crack } = this.nodes;
-    pan.pan.setValueAtTime(panOf(col.x), time);
+  onBar(stats, time, on) {
+    const n = this.nodes;
+    const activity = clamp01(stats.coverage * 60);
+    if (on('harmony')) n.pad.triggerAttackRelease(microChord(0, [0, 2, 3], this.scale, 45), '1m', time, 0.4 + activity * 0.3);
+    n.thunderGain.gain.cancelScheduledValues(time);
+    if (on('bass') && activity > 0.2) {
+      n.thunderGain.gain.setValueAtTime(0, time);
+      n.thunderGain.gain.linearRampToValueAtTime(0.35 * activity, time + 0.6);
+      n.thunderGain.gain.linearRampToValueAtTime(0, time + 2.8);
+    } else {
+      n.thunderGain.gain.rampTo(0, 0.5, time);
+    }
+    n.rainGain.gain.rampTo(on('texture') ? activity * 0.2 : 0, 2, time);
+  },
+
+  onStep(col, time, on) {
+    if (!on('melody') || col.coverage < 0.0015) return 0;
+    this.nodes.pan.pan.setValueAtTime(panOf(col.x), time);
     const fromEquator = clamp01(Math.abs(col.lat - 0.5) * 3);
-    const midi = quantize(fromEquator, SCALES.minorPent, 31, 2);
     const vel = clamp01(0.35 + Math.sqrt(col.coverage) * 4);
-    drum.triggerAttackRelease(midiToNote(midi), '8n', time, vel);
-    if (col.coverage > 0.012) crack.triggerAttackRelease('32n', time + Tone.Time('32n').toSeconds(), 0.7);
+    this.nodes.drum.triggerAttackRelease(micro(fromEquator, this.scale, this.base), '8n', time, vel);
     return vel;
   },
 
@@ -89,7 +108,7 @@ export const lightning = {
   },
 
   dispose() {
-    if (this.nodes) this.nodes.rain.stop();
+    if (this.nodes) { this.nodes.rain.stop(); this.nodes.thunder.stop(); }
     Object.values(this.nodes || {}).forEach((x) => x.dispose());
     this.nodes = null;
   },

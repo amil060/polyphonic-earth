@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="160" viewBox="0 0 120 160" fill="none" role="img" aria-label="Polyphonic Earth">
+  <!-- Staff lines double as latitude lines -->
+  <g stroke="#7a8296" stroke-width="1.5" stroke-linecap="round" opacity="0.55">
+    <path d="M12 40H108M12 52H108M12 64H108M12 76H108M12 88H108"/>
+  </g>
+  <!-- The bowl of the P is the Earth, banded by the same lines -->
+  <circle cx="70" cy="64" r="26" fill="#67e8f9"/>
+  <g stroke="#0b0d14" stroke-width="2.5">
+    <path d="M44 52H96M44 64H96M44 76H96"/>
+  </g>
+  <!-- The stem of the P curls like a treble clef -->
+  <path d="M44 34C44 20 58 16 61 26C63 33 52 36 44 44V136C44 150 26 153 22 143C19 135 28 130 33 135" stroke="#eef0f5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="29" cy="139" r="6" fill="#eef0f5"/>
+</svg>

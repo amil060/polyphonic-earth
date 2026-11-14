@@ -1,23 +1,45 @@
-// Shared audio engine: master chain, musical scales, and the Listen-by-Touch probe voice.
+// Shared audio engine: ambient master chain, microtonal maqam scales, and the Listen-by-Touch probe.
 /* global Tone */
 
-export const SCALES = {
-  majorPent: [0, 2, 4, 7, 9],
-  minorPent: [0, 3, 5, 7, 10],
-  dorian: [0, 2, 3, 5, 7, 9, 10],
-  lydian: [0, 2, 4, 6, 7, 9, 11],
+export const clamp01 = (v) => Math.max(0, Math.min(1, v));
+export const panOf = (x) => Math.max(-0.9, Math.min(0.9, x * 2 - 1));
+const midiHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+/**
+ * Quarter-tone (24-EDO) maqam scales, written in cents from the tonic.
+ * Neutral seconds and thirds (150 and 350 cents) sit between the piano keys,
+ * which gives the music its microtonal colour.
+ */
+export const MAQAM = {
+  rast: [0, 200, 350, 500, 700, 900, 1050],    // bright, open
+  bayati: [0, 150, 300, 500, 700, 800, 1000],  // warm, searching
+  saba: [0, 150, 300, 400, 700, 800, 1000],    // tense, unresolved
+  hijaz: [0, 100, 400, 500, 700, 800, 1000],   // dramatic
 };
 
-/** Map a 0..1 value onto a musical scale. Returns a MIDI note number. */
-export function quantize(v, scale, baseMidi = 48, octaves = 3) {
+/**
+ * Map a 0..1 data value to a frequency on a microtonal scale.
+ * The value picks a scale degree; what is left over between two degrees bends the
+ * note by up to ±25 cents, so small differences in the data stay audible.
+ */
+export function micro(v, scale, baseMidi = 48, octaves = 2) {
   const steps = scale.length * octaves;
-  const i = Math.max(0, Math.min(steps, Math.round(v * steps)));
-  return baseMidi + Math.floor(i / scale.length) * 12 + scale[i % scale.length];
+  const pos = clamp01(v) * steps;
+  const i = Math.min(steps, Math.floor(pos));
+  const frac = pos - i;
+  const cents = Math.floor(i / scale.length) * 1200 + scale[i % scale.length] + (frac - 0.5) * 50;
+  return midiHz(baseMidi) * Math.pow(2, cents / 1200);
 }
 
-export const midiToNote = (m) => Tone.Frequency(m, 'midi').toNote();
-export const clamp01 = (v) => Math.max(0, Math.min(1, v));
-export const panOf = (x) => Math.max(-0.95, Math.min(0.95, x * 2 - 1));
+/** A chord on the same maqam: degrees are scale indices from a root degree. */
+export function microChord(rootDeg, degrees, scale, baseMidi) {
+  return degrees.map((d) => {
+    const k = rootDeg + d;
+    const oct = Math.floor(k / scale.length);
+    const cents = oct * 1200 + scale[((k % scale.length) + scale.length) % scale.length];
+    return midiHz(baseMidi) * Math.pow(2, cents / 1200);
+  });
+}
 
 export class Engine {
   constructor() {
@@ -27,17 +49,21 @@ export class Engine {
   async start() {
     if (this.started) return;
     await Tone.start();
+    // Visual callbacks (legend text, ripples) must not be dropped when the tab's frames lag.
+    Tone.Draw.expiration = 5;
     this.limiter = new Tone.Limiter(-3).toDestination();
     this.master = new Tone.Volume(-8).connect(this.limiter);
-    this.reverb = new Tone.Reverb({ decay: 5, preDelay: 0.02, wet: 0.35 }).connect(this.master);
+    // Ambient, cinematic room: long tail, a little pre-delay so notes stay clear.
+    this.reverb = new Tone.Reverb({ decay: 9, preDelay: 0.04, wet: 0.42 }).connect(this.master);
     await this.reverb.generate();
     this.bus = new Tone.Gain(1).connect(this.reverb); // scenes connect here
+    this.dry = new Tone.Gain(0.6).connect(this.master); // for clicks that should stay close
 
     // Probe voice for Listen by Touch: clear sine tone, panned by position.
     this.probePan = new Tone.Panner(0).connect(this.master);
     this.probe = new Tone.Synth({
       oscillator: { type: 'sine' },
-      envelope: { attack: 0.01, decay: 0.12, sustain: 0.25, release: 0.25 },
+      envelope: { attack: 0.01, decay: 0.15, sustain: 0.3, release: 0.3 },
       volume: -10,
     }).connect(this.probePan);
     this.tick = new Tone.NoiseSynth({
@@ -46,7 +72,14 @@ export class Engine {
       volume: -26,
     }).connect(this.probePan);
 
-    Tone.Transport.bpm.value = 84;
+    // Earcon for "no data here" during the sweep (e.g. land under the ocean sweep).
+    this.knockPan = new Tone.Panner(0).connect(this.dry);
+    this.knock = new Tone.MembraneSynth({
+      pitchDecay: 0.02, octaves: 2,
+      envelope: { attack: 0.001, decay: 0.12, sustain: 0 },
+      volume: -24,
+    }).connect(this.knockPan);
+
     this.started = true;
   }
 
@@ -56,13 +89,19 @@ export class Engine {
     this.master.volume.rampTo(pct <= 0 ? -Infinity : -40 + pct * 0.36, 0.1);
   }
 
-  /** Play the touch probe: value 0..1 → pitch, x 0..1 → stereo, null → soft "no data" tick. */
+  /** Soft wooden knock that marks a silent (no-data) slice of the sweep. */
+  knockAt(x, time) {
+    this.knockPan.pan.setValueAtTime(panOf(x), time);
+    this.knock.triggerAttackRelease('C2', '32n', time, 0.4);
+  }
+
+  /** Play the touch probe: value 0..1 → microtonal pitch, x 0..1 → stereo, null → soft tick. */
   playProbe(value, x, scene) {
     if (!this.started) return;
     const now = Tone.now();
     this.probePan.pan.setValueAtTime(panOf(x), now);
     if (value == null) { this.tick.triggerAttackRelease(0.04, now); return; }
-    const midi = quantize(value, scene.probeScale || SCALES.majorPent, scene.probeBase || 52, 3);
-    this.probe.triggerAttackRelease(midiToNote(midi), 0.18, now, 0.5 + value * 0.4);
+    const f = micro(value, scene.scale || MAQAM.rast, scene.base || 52, 2);
+    this.probe.triggerAttackRelease(f, 0.2, now, 0.5 + value * 0.4);
   }
 }

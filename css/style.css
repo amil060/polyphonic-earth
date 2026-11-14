@@ -86,7 +86,11 @@ kbd {
 }
 .intro[hidden] { display: none; }
 .intro-card { text-align: center; display: grid; justify-items: center; gap: 20px; }
-.intro h1 { font-size: clamp(40px, 7vw, 64px); letter-spacing: -0.02em; color: var(--text); }
+.intro h1 { font-size: clamp(40px, 7vw, 64px); letter-spacing: -0.02em; color: var(--text); margin-top: -8px; }
+.intro h1 span { color: var(--accent); }
+.logo-xl { width: 72px; height: 96px; }
+.logo-xl .logo-staff { stroke-width: 1.5; }
+.logo-xl .logo-clef { stroke-width: 8; }
 .play-ring {
   width: 112px; height: 112px; border-radius: 50%; cursor: pointer;
   display: grid; place-items: center; color: var(--deep);
@@ -109,9 +113,12 @@ kbd {
   position: relative; z-index: 5;
 }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.logo { width: 28px; height: 28px; flex: none; }
-.logo circle { fill: none; stroke: var(--text-2); stroke-width: 1.5; }
-.logo path { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linecap: round; }
+.logo { width: 27px; height: 36px; flex: none; }
+.logo .logo-staff { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; opacity: .55; fill: none; }
+.logo .logo-earth { fill: var(--accent); transition: fill 300ms var(--ease); } /* the planet takes the scene colour */
+.logo .logo-bands { stroke: var(--deep); stroke-width: 3; fill: none; }
+.logo .logo-clef { stroke: var(--text); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.logo .logo-dot { fill: var(--text); }
 .brand-name { font-size: 16px; font-weight: 500; margin: 0; }
 .brand-sub { margin: 0; font-size: 12px; color: var(--muted); }
 
@@ -223,6 +230,15 @@ kbd {
   background: var(--glass); border: 1px solid var(--hair); border-radius: var(--r-panel);
   padding: 4px;
 }
+.layers { display: inline-flex; align-items: center; gap: 4px; padding: 0 4px; border-left: 1px solid var(--hair); }
+.layers-label { font-size: 12px; color: var(--muted); padding: 0 4px 0 8px; }
+.chip {
+  font: 500 13px var(--font); color: var(--muted); background: transparent;
+  border: 1px solid var(--hair); border-radius: 6px; height: 32px; padding: 0 10px; cursor: pointer;
+  transition: color 150ms var(--ease), background-color 150ms var(--ease), border-color 150ms var(--ease);
+}
+.chip:hover { color: var(--text); border-color: var(--hair-strong); }
+.chip[aria-pressed="true"] { color: var(--text); background: var(--raised); border-color: var(--hair-strong); box-shadow: inset 0 -2px 0 var(--accent); }
 .vol { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); padding: 0 12px 0 8px; }
 input[type="range"] { accent-color: var(--text); width: 120px; height: 32px; margin: 0; }
 
@@ -278,6 +294,10 @@ input[type="range"] { accent-color: var(--text); width: 120px; height: 32px; mar
 .log li .n { color: var(--accent); }
 .log .log-empty { display: block; white-space: normal; font-family: var(--font); font-size: 13px; }
 
+.recs { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.recs li { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 13px; color: var(--text-2); }
+.recs audio { width: 100%; height: 32px; }
+.recs a { font: 500 12px var(--mono); color: var(--text-2); }
 .spark { margin: 16px 0 0; }
 .spark[hidden] { display: none; }
 .spark svg { width: 100%; height: 80px; display: block; }
