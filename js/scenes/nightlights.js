@@ -76,10 +76,10 @@ export const nightlights = {
   build(engine) {
     const n = (this.nodes = {});
     n.pan = new Tone.Panner(0).connect(engine.bus);
-    n.bell = new Tone.PolySynth(Tone.FMSynth, { maxPolyphony: 8,
+    n.bell = new Tone.PolySynth(Tone.FMSynth, { maxPolyphony: 16,
       harmonicity: 3.01, modulationIndex: 4,
-      envelope: { attack: 0.004, decay: 1.6, sustain: 0, release: 3 },
-      modulationEnvelope: { attack: 0.004, decay: 0.6, sustain: 0, release: 1.5 },
+      envelope: { attack: 0.015, decay: 1.6, sustain: 0, release: 3 },
+      modulationEnvelope: { attack: 0.012, decay: 0.6, sustain: 0, release: 1.5 },
       volume: -9,
     }).connect(n.pan);
     n.padFilter = new Tone.Filter(1800, 'lowpass').connect(engine.bus);
@@ -87,7 +87,7 @@ export const nightlights = {
       envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 },
       volume: -26,
     }).connect(n.padFilter);
-    n.drone = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3,
+    n.drone = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 8,
       oscillator: { type: 'fatsine', count: 2, spread: 8 },
       envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 },
       volume: -28,

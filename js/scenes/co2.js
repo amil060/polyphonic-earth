@@ -62,7 +62,7 @@ export const co2 = {
       filterEnvelope: { attack: 0.05, decay: 0.4, sustain: 0.4, baseFrequency: 500, octaves: 2.5 },
       volume: -10,
     }).connect(n.vib);
-    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3, oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 }, volume: -28 }).connect(engine.bus);
+    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 8, oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 }, volume: -28 }).connect(engine.bus);
     n.hazeGain = new Tone.Gain(0).connect(engine.bus);
     n.hazeFilter = new Tone.Filter(350, 'lowpass').connect(n.hazeGain);
     n.haze = new Tone.Noise('brown').connect(n.hazeFilter).start();

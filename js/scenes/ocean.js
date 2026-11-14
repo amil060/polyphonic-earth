@@ -67,7 +67,7 @@ export const ocean = {
       envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 },
       volume: -24,
     }).connect(n.padFilter);
-    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3,
+    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 8,
       oscillator: { type: 'sine' },
       envelope: { attack: 1.5, decay: 0.5, sustain: 0.9, release: 4 },
       volume: -28,
