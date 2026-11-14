@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=202611142036">
+  <link rel="stylesheet" href="css/style.css?v=202611142040">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -67,6 +67,7 @@
             <h2 id="scene-title">Scene</h2>
             <p id="scene-sub"></p>
             <p id="scene-listen" class="scene-listen"></p>
+            <p id="touch-badge" class="badge" hidden>Listen by Touch is on · use the arrows or your pointer · Esc to stop</p>
           </div>
           <div class="readout" aria-hidden="true">
             <span class="live-dot" id="live-dot">Live</span>
@@ -76,7 +77,6 @@
             <span id="measured" class="npm measured"></span>
           </div>
         </div>
-        <div id="touch-badge" class="badge" hidden>Listen by Touch · arrows or pointer</div>
 
         <!-- Sound legend callout: explains the lowest and highest note before the music starts -->
         <div id="callout" class="callout" aria-hidden="true" hidden>
@@ -225,6 +225,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=202611142036"></script>
+  <script type="module" src="js/main.js?v=202611142040"></script>
 </body>
 </html>
