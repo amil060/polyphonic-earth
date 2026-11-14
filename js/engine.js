@@ -41,6 +41,27 @@ export function microChord(rootDeg, degrees, scale, baseMidi) {
   });
 }
 
+/**
+ * iOS routes Web Audio through the "ambient" session, which the silent switch mutes.
+ * A looping, silent <audio> element started in the same tap moves the page to the
+ * media-playback session, so the music is heard with the switch on.
+ */
+let mediaUnlock = null;
+function unlockMediaSession() {
+  if (mediaUnlock) return;
+  const sr = 8000, n = 800; // 0.1 s of silence, 8-bit mono WAV
+  const buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+  const s = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  s(0, 'RIFF'); v.setUint32(4, 36 + n, true); s(8, 'WAVE'); s(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr, true);
+  v.setUint16(32, 1, true); v.setUint16(34, 8, true); s(36, 'data'); v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+  mediaUnlock = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
+  mediaUnlock.loop = true;
+  mediaUnlock.setAttribute('playsinline', '');
+  mediaUnlock.play().catch(() => { /* not needed on this browser */ });
+}
+
 export class Engine {
   constructor() {
     this.started = false;
@@ -48,15 +69,23 @@ export class Engine {
 
   async start() {
     if (this.started) return;
-    // 48 kHz with a playback latency hint: half the DSP work of a 96 kHz device default,
-    // which removes the dropouts (heard as crackle) on slower laptops.
-    try {
-      const native = new AudioContext({ sampleRate: 48000, latencyHint: 'playback' });
-      Tone.setContext(new Tone.Context({ context: native, lookAhead: 0.2 }));
-    } catch {
-      Tone.getContext().lookAhead = 0.2; // browser refused the sample rate: keep the default context
+    // Everything up to Tone.start() runs synchronously inside the tap, which phones require.
+    // iPhone: let Web Audio play even when the ring/silent switch is on.
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* older Safari */ }
+    unlockMediaSession();
+    // Only high-rate devices (96 kHz desktops) get a 48 kHz context; phones keep their native rate.
+    if (Tone.getContext().sampleRate > 48000) {
+      try {
+        const native = new AudioContext({ sampleRate: 48000, latencyHint: 'playback' });
+        Tone.setContext(new Tone.Context({ context: native, lookAhead: 0.2 }));
+      } catch {
+        Tone.getContext().lookAhead = 0.2;
+      }
+    } else {
+      Tone.getContext().lookAhead = 0.2;
     }
     await Tone.start();
+    try { await Tone.getContext().resume(); } catch { /* already running */ }
     // Visual callbacks (legend text, ripples) must not be dropped when the tab's frames lag.
     Tone.getContext().draw.expiration = 5;
     this.limiter = new Tone.Limiter(-3).toDestination();

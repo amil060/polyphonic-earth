@@ -362,6 +362,8 @@ $('layers')?.addEventListener('click', (e) => {
 
 function play() {
   if (!engine.started || !state.scene) return;
+  // Phones suspend audio when the screen locks or the tab is hidden; a tap on Play wakes it.
+  if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!state.scene.nodes) state.scene.build(engine);
   if (state.needsIntro) { startIntro(); state.needsIntro = false; }
   ensureLoop();
@@ -536,6 +538,7 @@ $('about-btn').addEventListener('click', () => {
 });
 el.start.addEventListener('click', async () => {
   if (engine.started) {
+    Tone.getContext().resume().catch(() => {});
     el.intro.hidden = true;
     el.stage.focus({ preventScroll: true });
     if (!state.playing) play();
@@ -544,10 +547,22 @@ el.start.addEventListener('click', async () => {
   el.start.disabled = true;
   el.start.querySelector('.sr-only').textContent = 'Loading sounds';
   $('intro-desc').textContent = 'Loading sounds…';
-  await engine.start();
+  try {
+    await engine.start();
+  } catch (err) {
+    el.start.disabled = false;
+    $('intro-desc').textContent = 'Sound could not start on this device. Tap play again, or try another browser.';
+    console.error(err);
+    return;
+  }
+  el.start.disabled = false;
+  if (Tone.getContext().state !== 'running') {
+    $('intro-desc').textContent = 'Tap play once more to turn the sound on. On iPhone, also check the silent switch and volume.';
+    try { await Tone.getContext().resume(); } catch { /* ignore */ }
+    if (Tone.getContext().state !== 'running') return;
+  }
   engine.setVolume(Number(el.volume.value));
   el.intro.hidden = true;
-  el.start.disabled = false;
   if (!state.scene) await selectScene(0);
   else state.scene.build(engine);
   Tone.getContext().transport.bpm.value = state.scene.bpm;
