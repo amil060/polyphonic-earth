@@ -155,6 +155,10 @@ async function selectScene(i) {
   state.scene = s;
   state.step = -1; state.bar = 0;
   state.needsIntro = true;
+  state.finished = false;
+  state.ending = false;
+  if (s.series) s.idx = 0;
+  if (s === nightlights) state.yearIndex = 0;
 
   document.documentElement.style.setProperty('--accent', s.accent);
   SCENES.forEach((x) => $(`tab-${x.id}`).setAttribute('aria-selected', String(x === s)));
@@ -332,7 +336,7 @@ function ensureLoop() {
   if (state.loop) return;
   state.loop = new Tone.Loop((time) => {
     const s = state.scene;
-    if (!s?.nodes || !analyzer.ready) return;
+    if (!s?.nodes || !analyzer.ready || state.ending) return;
 
     // Sound legend: before the music, play the lowest and the highest value once,
     // like the axis of a chart, while the scale marker shows where each sits.
@@ -365,12 +369,19 @@ function ensureLoop() {
       }
       s.onBar(state.stats, time, layerOn);
       if (s === nightlights && el.autoyear.checked && state.bar % 2 === 0) {
-        Tone.getContext().draw.schedule(() => showYear(state.yearIndex + 1), time);
+        // After the last stop (Change) has played its two bars, the scene ends.
+        if (state.yearIndex >= YEARS.length - 1) { state.ending = true; Tone.getContext().draw.schedule(() => finishScene(), time); }
+        else Tone.getContext().draw.schedule(() => showYear(state.yearIndex + 1), time);
       }
       if (state.bar % 8 === 1) Tone.getContext().draw.schedule(() => describeNow(), time);
     }
     const col = state.cols[state.step];
     const hit = col ? s.onStep(col, time, layerOn, engine) : 0;
+    // Data-series scenes end after their last value (the index wraps back to the start).
+    if (s.series && s.idx === 0 && state.bar > 0) {
+      state.ending = true; // no more notes; let the last one ring, then stop
+      Tone.getContext().draw.schedule(() => finishScene(), time + 1.5);
+    }
     Tone.getContext().draw.schedule(() => {
       if (hit) addRipple(col.x, col.lat, hit, col);
       pushTrace(hit || 0);
@@ -419,6 +430,7 @@ function play() {
   // Phones suspend audio when the screen locks or the tab is hidden; a tap on Play wakes it.
   if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!state.scene.nodes) state.scene.build(engine);
+  if (state.finished) restartScene(); // Play after the end starts the scene again from the beginning
   if (state.needsIntro) { startIntro(); state.needsIntro = false; }
   ensureLoop();
   Tone.getContext().transport.start('+0.05');
@@ -430,6 +442,28 @@ function play() {
   el.play.setAttribute('aria-pressed', 'true');
   el.play.querySelector('span').textContent = 'Pause';
 }
+
+// ---------- End of a scene ----------
+// Each scene plays once: the NASA video to its end, Night Lights through every year to Change,
+// the Caspian series from 1981 to 2024. Then it stops; Play starts it again from the beginning.
+function finishScene() {
+  if (!state.playing || state.finished) return;
+  pause();
+  state.finished = true;
+  hideCallout();
+  el.play.querySelector('span').textContent = 'Play again';
+  setLive(`${state.scene.title} has finished. Press Play to hear it again from the beginning.`);
+}
+function restartScene() {
+  const s = state.scene;
+  state.finished = false;
+  state.ending = false;
+  state.needsIntro = true;
+  if (s.media.type === 'video') { try { el.video.currentTime = 0; } catch { /* not loaded yet */ } }
+  if (s === nightlights) showYear(0);
+  if (s.series) s.idx = 0;
+}
+el.video.addEventListener('ended', () => finishScene());
 
 function pause() {
   Tone.getContext().transport.pause();
