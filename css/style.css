@@ -112,7 +112,15 @@ kbd {
 .intro-steps li { background: rgba(17, 20, 28, 0.88); border: 1px solid var(--hair); border-radius: var(--r-card); padding: 14px 16px; display: grid; gap: 4px; }
 .intro-steps b { font-weight: 500; font-size: 14px; }
 .intro-steps span { font-size: 13px; line-height: 20px; color: var(--text-2); }
-.top-actions { display: flex; gap: 8px; }
+.top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.lang-pick select { height: 36px; min-width: 56px; padding: 0 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: var(--card); color: var(--text-2); font: 500 13px/1 "IBM Plex Mono", monospace; cursor: pointer; }
+.intro-langs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
+.intro-langs button { min-height: 32px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: transparent; color: var(--text-2); font: 500 13px/1.2 "IBM Plex Sans", sans-serif; cursor: pointer; }
+.intro-langs button:hover { color: var(--text); }
+.intro-langs button[aria-pressed="true"] { color: var(--text); border-color: var(--accent); background: rgba(255,255,255,.06); }
+.intro-langs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lang-pick select:hover { color: var(--text); }
+.lang-pick select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 720px) { .intro-steps { grid-template-columns: 1fr; } .intro { align-items: start; overflow-y: auto; } }
 
 /* ---------- Header ---------- */

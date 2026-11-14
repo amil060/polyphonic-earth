@@ -9,6 +9,7 @@ import { co2 } from './scenes/co2.js';
 import { caspian } from './scenes/caspian.js';
 import { climateAt } from './power.js';
 import { icon } from './icons.js';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -174,7 +175,7 @@ async function selectScene(i) {
   el.sparkWrap.hidden = s !== nightlights;
   applyScale();
   hideCallout();
-  $('scene-listen').textContent = LISTEN[s.id];
+  $('scene-listen').textContent = t('listen.' + s.id);
   for (const k of ['data', 'sound', 'meaning', 'limits']) $(`sci-${k}`).textContent = SCIENCE[s.id][k];
   el.readoutValue.textContent = '—';
   state.layers = new Set();
@@ -240,14 +241,6 @@ function applyScale() {
   $('scale-top').innerHTML = `<b>${ui.top[0]}</b>${ui.top[1]}`;
   $('scale-bottom').innerHTML = `<b>${ui.bottom[0]}</b>${ui.bottom[1]}`;
 }
-// One plain line per scene: what the sound means. Shown under the title and after the sound legend.
-const LISTEN = {
-  ocean: 'High note = warm water · low note = cold water · soft knock = land · left ear = west',
-  nightlights: 'Louder, higher bell = brighter city · the drone rises as the world gets brighter · left ear = the Americas',
-  lightning: 'Each drum hit = lightning · deep boom = tropical storm · higher drum = far from the equator',
-  co2: 'Higher note = more CO₂ · the chord shimmers and beats as CO₂ rises · rumble = how much is covered',
-  caspian: 'One note = one year in Mingachevir · higher = warmer · the low drone is the 1980s average',
-};
 
 // Data → sound → meaning, plus honest limits, for every scene (Best Use of Science).
 const SCIENCE = {
@@ -294,9 +287,9 @@ function showCallout(kind) {
     $('callout-chip').style.setProperty('--chip', chip);
     $('callout-bar').parentElement.style.setProperty('--level', level);
   };
-  if (kind === 'low') set('Sound legend · 1 of 2', 'Lowest note', `means ${s.refLabels[0]}`, ui.grad[ui.grad.length - 1], '6%');
-  else if (kind === 'high') set('Sound legend · 2 of 2', 'Highest note', `means ${s.refLabels[1]}`, ui.grad[0], '100%');
-  else set('Now listen', 'The sweep plays west → east', LISTEN[s.id], s.accent, '50%');
+  if (kind === 'low') set(t('legend1'), t('lowest'), `${t('means')} ${s.refLabels[0]}`, ui.grad[ui.grad.length - 1], '6%');
+  else if (kind === 'high') set(t('legend2'), t('highest'), `${t('means')} ${s.refLabels[1]}`, ui.grad[0], '100%');
+  else set(t('now'), t('sweep'), t('listen.' + s.id), s.accent, '50%');
   box.hidden = false;
   box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
   $('scale').classList.toggle('focus', kind !== 'go');
@@ -442,7 +435,7 @@ function play() {
   state.noteTimes = [];
   el.liveDot.classList.add('on');
   el.play.setAttribute('aria-pressed', 'true');
-  el.play.querySelector('span').textContent = 'Pause';
+  el.play.querySelector('span').textContent = t('pause');
 }
 
 // ---------- End of a scene ----------
@@ -453,7 +446,7 @@ function finishScene() {
   pause();
   state.finished = true;
   hideCallout();
-  el.play.querySelector('span').textContent = 'Play again';
+  el.play.querySelector('span').textContent = t('again');
   showSummary();
 }
 
@@ -542,7 +535,7 @@ function pause() {
   state.drawStep = undefined;
   el.liveDot.classList.remove('on');
   el.play.setAttribute('aria-pressed', 'false');
-  el.play.querySelector('span').textContent = 'Play';
+  el.play.querySelector('span').textContent = t('play');
 }
 
 const togglePlay = () => (state.playing ? pause() : play());
@@ -550,7 +543,7 @@ const togglePlay = () => (state.playing ? pause() : play());
 // ---------- Descriptions ----------
 // ---------- Listener settings (saved on this device) ----------
 const SETTINGS_KEY = 'pe-settings';
-const settings = { mono: false, autoAnnounce: true, speak: false, rate: 1 };
+const settings = { mono: false, autoAnnounce: true, speak: false, rate: 1, lang: '' };
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch { /* storage blocked */ }
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ } };
 
@@ -559,7 +552,7 @@ function speak(text) {
   if (!settings.speak || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = document.documentElement.lang || 'en';
+  u.lang = 'en'; // generated descriptions are written in English
   u.rate = settings.rate;
   speechSynthesis.speak(u);
 }
@@ -771,8 +764,8 @@ $('visual-only').addEventListener('click', () => {
 // "What is this?" reopens the start screen; once sound is running, its play button just closes it.
 $('about-btn').addEventListener('click', () => {
   el.intro.hidden = false;
-  $('intro-desc').textContent = 'What if you could hear our planet changing?';
-  el.start.querySelector('.cta-label').textContent = engine.started ? 'Back to the map' : 'Listen to Earth';
+  $('intro-desc').textContent = t('q');
+  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('cta');
   el.start.focus();
 });
 el.start.addEventListener('click', async () => {
@@ -784,19 +777,19 @@ el.start.addEventListener('click', async () => {
     return;
   }
   el.start.disabled = true;
-  el.start.querySelector('.cta-label').textContent = 'Loading sounds…';
-  $('intro-desc').textContent = 'Loading sounds…';
+  el.start.querySelector('.cta-label').textContent = t('loading');
+  $('intro-desc').textContent = t('loading');
   try {
     await engine.start();
   } catch (err) {
     el.start.disabled = false;
-    $('intro-desc').textContent = 'Sound could not start on this device. Tap play again, or choose Explore without sound below.';
+    $('intro-desc').textContent = t('failStart');
     console.error(err);
     return;
   }
   el.start.disabled = false;
   if (Tone.getContext().state !== 'running') {
-    $('intro-desc').textContent = 'Tap play once more to turn the sound on. On iPhone, also check the silent switch and volume.';
+    $('intro-desc').textContent = t('tapAgain');
     try { await Tone.getContext().resume(); } catch { /* ignore */ }
     if (Tone.getContext().state !== 'running') return;
   }
@@ -933,6 +926,32 @@ function drawTrace() {
   tracePoly.setAttribute('points', pts.join(' '));
 }
 drawTrace();
+
+// ---------- Interface language ----------
+function pickLang() {
+  if (settings.lang && LANGS[settings.lang]) return settings.lang;
+  const nav = (navigator.languages || [navigator.language || 'en']).map((l) => l.slice(0, 2).toLowerCase());
+  return nav.find((l) => LANGS[l]) || 'en';
+}
+function renderLang() {
+  applyI18n();
+  $('lang').value = getLang();
+  document.querySelectorAll('.intro-langs [data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === getLang())));
+  const playing = el.play.getAttribute('aria-pressed') === 'true';
+  el.play.querySelector('span').textContent = t(playing ? 'pause' : state.finished ? 'again' : 'play');
+  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('cta');
+  if (state.scene) $('scene-listen').textContent = t('listen.' + state.scene.id);
+}
+setLang(pickLang());
+renderLang();
+function chooseLang(l) {
+  setLang(l);
+  settings.lang = getLang();
+  saveSettings();
+  renderLang();
+}
+$('lang').addEventListener('change', (e) => chooseLang(e.target.value));
+document.querySelectorAll('.intro-langs [data-lang]').forEach((b) => b.addEventListener('click', () => chooseLang(b.dataset.lang)));
 
 // Show the first scene moving behind the start gate so the first screen is never empty.
 selectScene(0).then(() => el.video.play().catch(() => {}));

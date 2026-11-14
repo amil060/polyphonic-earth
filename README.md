@@ -47,6 +47,7 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 
 - Fully keyboard-operable: `1`–`4` scenes, `Space` play/pause, `T` Listen by Touch, arrow keys explore, `D` describe, `[` `]` years, `-` `=` volume, `H` help.
 - `aria-live` descriptions written for screen readers, a proper tab pattern, visible focus, 44 px touch targets.
+- Interface in four languages: English, Azerbaijani, Spanish and Russian (start screen, controls, sound legend and the plain-language listening guide). The choice is saved on the device. Detailed science panels and generated descriptions stay in English.
 - Respects `prefers-reduced-motion`. Output passes through a limiter for hearing safety.
 - Responsive from phone to desktop.
 

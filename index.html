@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261114205804">
+  <link rel="stylesheet" href="css/style.css?v=20261114210533">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -21,17 +21,23 @@
       <h1 id="intro-title">Polyphonic <span>Earth</span></h1>
       <button id="start" class="play-ring" type="button" aria-describedby="intro-desc">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <span class="cta-label">Listen to Earth</span>
+        <span class="cta-label" data-i18n="cta">Listen to Earth</span>
       </button>
-      <p id="intro-desc" class="intro-line">What if you could hear our planet changing?</p>
-      <button id="visual-only" class="btn btn-ghost" type="button">Explore without sound</button>
-      <p class="intro-why">A jukebox that turns NASA's pictures of Earth into music, so anyone, including people who are blind, can explore our changing planet by ear.</p>
+      <p id="intro-desc" class="intro-line" data-i18n="q">What if you could hear our planet changing?</p>
+      <button id="visual-only" class="btn btn-ghost" type="button" data-i18n="visual">Explore without sound</button>
+      <p class="intro-why" data-i18n="why">A jukebox that turns NASA's pictures of Earth into music, so anyone, including people who are blind, can explore our changing planet by ear.</p>
       <ol class="intro-steps" aria-label="How it works">
-        <li><b>1 · NASA pictures</b><span>Real NASA animations: ocean temperature, city lights at night, lightning and CO₂.</span></li>
-        <li><b>2 · Colours become numbers</b><span>The app reads the colour of every pixel and turns it back into the data it shows.</span></li>
-        <li><b>3 · Numbers become music</b><span>A high value plays a high note. West sounds in your left ear, east in your right. Silence means no data.</span></li>
+        <li><b data-i18n="s1b">1 · NASA pictures</b><span data-i18n="s1">Real NASA animations: ocean temperature, city lights at night, lightning, CO₂ and our home region.</span></li>
+        <li><b data-i18n="s2b">2 · Colours become numbers</b><span data-i18n="s2">The app reads the colour of every pixel and turns it back into the data it shows.</span></li>
+        <li><b data-i18n="s3b">3 · Numbers become music</b><span data-i18n="s3">A high value plays a high note. West sounds in your left ear, east in your right. Silence means no data.</span></li>
       </ol>
-      <p class="intro-sub">Headphones recommended · Each scene starts by playing its lowest and highest note · <kbd>H</kbd> for keys</p>
+      <p class="intro-sub"><span data-i18n="sub">Headphones recommended · Each scene starts by playing its lowest and highest note</span> · <kbd>H</kbd></p>
+      <div class="intro-langs" role="group" aria-label="Language · Dil · Idioma · Язык">
+        <button type="button" data-lang="en" lang="en" aria-pressed="false">English</button>
+        <button type="button" data-lang="az" lang="az" aria-pressed="false">Azərbaycanca</button>
+        <button type="button" data-lang="es" lang="es" aria-pressed="false">Español</button>
+        <button type="button" data-lang="ru" lang="ru" aria-pressed="false">Русский</button>
+      </div>
     </div>
   </div>
 
@@ -44,10 +50,11 @@
       </div>
     </div>
     <div class="top-actions">
-      <button id="about-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">What is this?</button>
-      <button id="settings-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">Listening settings</button>
+      <label class="lang-pick"><span class="sr-only" data-i18n="lang">Language</span><select id="lang"><option value="en" lang="en">EN</option><option value="az" lang="az">AZ</option><option value="es" lang="es">ES</option><option value="ru" lang="ru">RU</option></select></label>
+      <button id="about-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog" data-i18n="about">What is this?</button>
+      <button id="settings-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog" data-i18n="settings">Listening settings</button>
       <button id="help-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
-        Keyboard <kbd>H</kbd>
+        <span data-i18n="keys">Keyboard</span> <kbd>H</kbd>
       </button>
     </div>
   </header>
@@ -146,15 +153,15 @@
             <button id="play" class="btn btn-primary" type="button" aria-pressed="false">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
               <svg aria-hidden="true" viewBox="0 0 24 24" class="i-pause"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
-              <span>Play</span> <kbd>Space</kbd>
+              <span id="play-label">Play</span> <kbd>Space</kbd>
             </button>
             <button id="touch" class="btn" type="button" aria-pressed="false">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 11V5a2 2 0 0 1 4 0v5m0 0V4a2 2 0 0 1 4 0v8m-8-1V8a2 2 0 0 0-4 0v7a7 7 0 0 0 14 0v-3"/></svg>
-              Listen by Touch <kbd>T</kbd>
+              <span data-i18n="touch">Listen by Touch</span> <kbd>T</kbd>
             </button>
             <button id="describe" class="btn" type="button">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-              Describe <kbd>D</kbd>
+              <span data-i18n="describe">Describe</span> <kbd>D</kbd>
             </button>
             <div id="layers" class="layers" role="group" aria-label="Sound layers: switch each one on or off"></div>
             <label class="vol">
@@ -176,15 +183,15 @@
     <section class="info" aria-label="What am I hearing?">
       <div class="info-main">
         <section class="science" aria-labelledby="sci-title">
-          <h2 id="sci-title">How to read this scene</h2>
+          <h2 id="sci-title" data-i18n="read">How to read this scene</h2>
           <ol class="flow">
-            <li><b>NASA data</b><span id="sci-data"></span></li>
-            <li><b>Sound</b><span id="sci-sound"></span></li>
-            <li><b>Meaning</b><span id="sci-meaning"></span></li>
+            <li><b data-i18n="data">NASA data</b><span id="sci-data"></span></li>
+            <li><b data-i18n="sound">Sound</b><span id="sci-sound"></span></li>
+            <li><b data-i18n="meaning">Meaning</b><span id="sci-meaning"></span></li>
           </ol>
-          <p class="limits"><b>Limits</b> <span id="sci-limits"></span></p>
+          <p class="limits"><b data-i18n="limits">Limits</b> <span id="sci-limits"></span></p>
         </section>
-        <h2>What am I hearing?</h2>
+        <h2 data-i18n="hear">What am I hearing?</h2>
         <ul id="legend" class="legend"></ul>
       </div>
       <div class="info-side">
@@ -224,7 +231,7 @@
   </main>
 
   <section id="about" class="about" aria-labelledby="about-title">
-    <h2 id="about-title">About the project</h2>
+    <h2 id="about-title" data-i18n="aboutTitle">About the project</h2>
     <div class="about-grid">
       <div><h3>The problem</h3><p>NASA's Earth Information Center shows how our planet is changing through beautiful visualizations, but only to people who can see them. More than 2.2 billion people live with a vision impairment (WHO), and many more learn better by listening.</p></div>
       <div><h3>Our answer</h3><p>Polyphonic Earth reads every frame of NASA visualizations and NASA POWER data and plays them as music in real time. Pitch, loudness, rhythm and stereo carry the data; descriptions, Listen by Touch and a visual mode make it usable with or without sight or hearing.</p></div>
@@ -266,6 +273,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261114205804"></script>
+  <script type="module" src="js/main.js?v=20261114210533"></script>
 </body>
 </html>
