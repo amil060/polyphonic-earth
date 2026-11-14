@@ -157,6 +157,7 @@ async function selectScene(i) {
   state.needsIntro = true;
   state.finished = false;
   state.ending = false;
+  hideSummary();
   if (s.series) s.idx = 0;
   if (s === nightlights) state.yearIndex = 0;
 
@@ -430,6 +431,7 @@ function play() {
   // Phones suspend audio when the screen locks or the tab is hidden; a tap on Play wakes it.
   if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!state.scene.nodes) state.scene.build(engine);
+  hideSummary();
   if (state.finished) restartScene(); // Play after the end starts the scene again from the beginning
   if (state.needsIntro) { startIntro(); state.needsIntro = false; }
   ensureLoop();
@@ -452,8 +454,76 @@ function finishScene() {
   state.finished = true;
   hideCallout();
   el.play.querySelector('span').textContent = 'Play again';
-  setLive(`${state.scene.title} has finished. Press Play to hear it again from the beginning.`);
+  showSummary();
 }
+
+// What the listener just heard, and why it matters. Numbers come from this run's data.
+const SUMMARY = {
+  ocean: () => ({
+    heard: 'The melody climbed in the tropics and fell toward the poles: warm water near the equator, cold water near Antarctica and the Arctic. Gaps and knocks were the continents.',
+    why: 'The ocean absorbs most of the extra heat trapped by greenhouse gases. Currents carry that heat from the tropics toward the poles and shape weather on land, so a change in ocean temperature is a change in the whole climate.',
+    source: 'Data: ECCO2 ocean model, NASA Scientific Visualization Studio (svs.gsfc.nasa.gov/3912).',
+  }),
+  nightlights: () => {
+    const e = state.yearEnergy;
+    const g = e ? Math.round((e.at(-1) / e[0] - 1) * 100) : null;
+    return {
+      heard: `The bells grew busier from 2012 to 2023${g != null ? `: the light this app measured in the NASA frames changed by ${g >= 0 ? '+' : ''}${g}%` : ''}. In Change mode, rising chimes marked places that got brighter and falling tones places that got darker.`,
+      why: 'Night light is a fingerprint of people: it tracks cities, electricity access and economic growth, and it goes dark after disasters, conflict or power cuts. Brighter is not always better. It also means more energy use and light pollution.',
+      source: 'Data: VIIRS Black Marble, NASA Scientific Visualization Studio (svs.gsfc.nasa.gov/5313). The percentage is measured from image pixels, not NASA radiance.',
+    };
+  },
+  lightning: () => {
+    const total = state.stats.north + state.stats.south || 1;
+    const n = Math.round((state.stats.north / total) * 100);
+    return {
+      heard: `Drums followed storms across the continents. In the last frames, ${n}% of the flashes were north of the equator. Over the seasons the drumming moves north and south with the Sun.`,
+      why: 'Lightning shows where the atmosphere is hot, wet and unstable. It starts wildfires, damages power grids and is a key sign of extreme weather, so scientists track it to understand how storms respond to a warming climate.',
+      source: 'Data: Lightning Imaging Sensor on the ISS, NASA Scientific Visualization Studio (svs.gsfc.nasa.gov/5011).',
+    };
+  },
+  co2: () => ({
+    heard: 'The chord started calm and began to beat and shimmer as orange and red plumes filled the view. The melody traced the strongest plumes.',
+    why: 'Carbon dioxide from burning fossil fuels is the main long-lived greenhouse gas. These plumes show where it is released, around cities and power plants, and how winds carry it across the continent.',
+    source: 'Data: DYAMOND GEOS model, NASA Scientific Visualization Studio (svs.gsfc.nasa.gov/5196).',
+  }),
+  caspian: () => {
+    const d = caspian.data;
+    const late = d ? d.t2m_c.slice(-10).reduce((a, b) => a + b, 0) / 10 : null;
+    return {
+      heard: d
+        ? `44 years in Mingachevir, one note per year. The melody spent more and more time above the low drone of the 1980s: the last ten years averaged ${late.toFixed(1)} °C, ${(late - d.base).toFixed(1)} °C warmer than 1981–1990.`
+        : 'Forty-four years in Mingachevir, one note per year, rising as the region warmed.',
+      why: 'This is home for our team. A warmer region means more evaporation from rivers, reservoirs and the Caspian Sea, which matters for drinking water, farming and the Mingachevir reservoir. A 2017 study linked warming over the Caspian to a sea-level drop of about 1.5 m between 1996 and 2015.',
+      source: 'Data: NASA POWER (MERRA-2) for Mingachevir, 1981–2024; image NASA GIBS MODIS. Sea-level figure: Chen et al., Geophysical Research Letters, 2017.',
+    };
+  },
+};
+
+function showSummary() {
+  const s = state.scene;
+  const t = SUMMARY[s.id]();
+  $('summary-title').textContent = s.title;
+  $('summary-heard').textContent = t.heard;
+  $('summary-why').textContent = t.why;
+  $('summary-source').textContent = t.source;
+  const next = SCENES[(SCENES.indexOf(s) + 1) % SCENES.length];
+  $('summary-next').textContent = `Next: ${next.short}`;
+  const box = $('summary');
+  box.hidden = false;
+  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+  setLive(`${s.title} has finished. What you heard: ${t.heard} Why it matters: ${t.why}`);
+  $('summary-title').focus({ preventScroll: true });
+  if (innerWidth <= 860) box.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+}
+function hideSummary() { $('summary').hidden = true; }
+$('summary-replay').addEventListener('click', () => { hideSummary(); play(); });
+$('summary-next').addEventListener('click', async () => {
+  hideSummary();
+  await selectScene((SCENES.indexOf(state.scene) + 1) % SCENES.length);
+  play();
+});
+$('summary-close').addEventListener('click', () => { hideSummary(); el.play.focus(); });
 function restartScene() {
   const s = state.scene;
   state.finished = false;

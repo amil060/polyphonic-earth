@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=202611142043">
+  <link rel="stylesheet" href="css/style.css?v=202611142047">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -77,6 +77,22 @@
             <span id="measured" class="npm measured"></span>
           </div>
         </div>
+
+        <!-- End-of-scene summary: what the listener just heard and why it matters -->
+        <section id="summary" class="summary" aria-labelledby="summary-title" hidden>
+          <p class="summary-step">Scene finished</p>
+          <h3 id="summary-title" tabindex="-1"></h3>
+          <div class="summary-cols">
+            <div><b>What you heard</b><p id="summary-heard"></p></div>
+            <div><b>Why it matters</b><p id="summary-why"></p></div>
+          </div>
+          <p id="summary-source" class="summary-source"></p>
+          <div class="summary-actions">
+            <button id="summary-replay" class="btn" type="button">Play again</button>
+            <button id="summary-next" class="btn btn-primary" type="button">Next scene</button>
+            <button id="summary-close" class="btn btn-ghost" type="button">Close</button>
+          </div>
+        </section>
 
         <!-- Sound legend callout: explains the lowest and highest note before the music starts -->
         <div id="callout" class="callout" aria-hidden="true" hidden>
@@ -225,6 +241,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=202611142043"></script>
+  <script type="module" src="js/main.js?v=202611142047"></script>
 </body>
 </html>

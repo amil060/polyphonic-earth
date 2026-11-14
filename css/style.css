@@ -192,6 +192,25 @@ kbd {
 }
 .scene-card .badge[hidden] { display: none; }
 
+/* End-of-scene summary over the map */
+.summary {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 6;
+  width: min(720px, calc(100% - 48px)); max-height: calc(100% - 48px); overflow: auto;
+  padding: 24px; display: grid; gap: 16px;
+  background: rgba(11, 13, 20, 0.95); border: 1px solid var(--hair-strong); border-radius: var(--r-panel);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.summary[hidden] { display: none; }
+.summary.enter { animation: enter 360ms var(--ease) both; }
+.summary-step { margin: 0; font: 400 12px/16px var(--mono); color: var(--muted); }
+.summary h3 { margin: 0; font-size: 24px; line-height: 30px; color: var(--text); text-transform: none; letter-spacing: 0; }
+.summary h3:focus { outline: none; }
+.summary-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.summary-cols b { display: block; font-weight: 500; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+.summary-cols p { margin: 0; font-size: 15px; line-height: 22px; color: var(--text); }
+.summary-source { margin: 0; font-size: 12px; line-height: 18px; color: var(--muted); }
+.summary-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
 /* Sound legend callout over the map */
 .callout {
   position: absolute; right: 200px; top: 50%; transform: translateY(-50%); z-index: 4;
@@ -365,6 +384,9 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
   .hud-side .tab { min-width: 0; white-space: nowrap; }
   .scale-legend { display: none; }
   .callout { position: static; transform: none; width: auto; margin: 12px 16px 0; }
+  .frame { align-items: stretch; }
+  .summary { position: static; transform: none; width: auto; max-height: none; margin: 12px 16px 0; }
+  .summary-cols { grid-template-columns: 1fr; }
   .timeline { grid-template-columns: auto 1fr auto; padding: 8px; }
   .timeline .track, .timeline .check { grid-column: 1 / -1; }
   .ticks button:nth-child(even) { visibility: hidden; }
