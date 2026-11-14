@@ -6,6 +6,7 @@ export const LANGS = { en: 'English', az: 'Azərbaycanca', es: 'Español', ru: '
 
 const S = {
   en: {
+    theme: 'Play our theme song', themeStop: 'Stop the theme song', themeBy: 'Original music by our teammate',
     failStart: 'Sound could not start on this device. Tap play again, or choose Explore without sound below.', tapAgain: 'Tap play once more to turn the sound on. On iPhone, also check the silent switch and volume.',
     legend1: 'Sound legend · 1 of 2', legend2: 'Sound legend · 2 of 2', lowest: 'Lowest note', highest: 'Highest note', means: 'means', now: 'Now listen', sweep: 'The sweep plays west → east', loading: 'Loading sounds…',
     q: 'What if you could hear our planet changing?',
@@ -26,6 +27,7 @@ const S = {
     'listen.caspian': 'One note = one year in Mingachevir · higher = warmer · the low drone is the 1980s average',
   },
   az: {
+    theme: 'Mövzu mahnımızı dinlə', themeStop: 'Mövzu mahnısını dayandır', themeBy: 'Komanda üzvümüzün orijinal bəstəsi:',
     failStart: 'Bu cihazda səs başlaya bilmədi. Yenidən toxunun və ya aşağıda “Səssiz kəşf et” seçin.', tapAgain: 'Səsi açmaq üçün bir dəfə də toxunun. iPhone-da səssiz rejim düyməsini və səs səviyyəsini də yoxlayın.',
     legend1: 'Səs açarı · 1/2', legend2: 'Səs açarı · 2/2', lowest: 'Ən aşağı nota', highest: 'Ən yüksək nota', means: 'deməkdir:', now: 'İndi dinləyin', sweep: 'Tarama qərbdən şərqə gedir', loading: 'Səslər yüklənir…',
     q: 'Planetimizin dəyişməsini eşidə bilsəydiniz?',
@@ -46,6 +48,7 @@ const S = {
     'listen.caspian': 'Bir nota = Mingəçevirdə bir il · yüksək = daha isti · alçaq dron 1980-ci illərin ortalamasıdır',
   },
   es: {
+    theme: 'Escucha nuestro tema', themeStop: 'Detener el tema', themeBy: 'Música original de nuestro compañero',
     failStart: 'El sonido no pudo iniciarse en este dispositivo. Toca de nuevo o elige “Explorar sin sonido”.', tapAgain: 'Toca una vez más para activar el sonido. En iPhone, revisa también el interruptor de silencio y el volumen.',
     legend1: 'Leyenda sonora · 1 de 2', legend2: 'Leyenda sonora · 2 de 2', lowest: 'Nota más grave', highest: 'Nota más aguda', means: 'significa', now: 'Ahora escucha', sweep: 'El barrido va de oeste a este', loading: 'Cargando sonidos…',
     q: '¿Y si pudieras oír cómo cambia nuestro planeta?',
@@ -66,6 +69,7 @@ const S = {
     'listen.caspian': 'Una nota = un año en Mingachevir · más aguda = más cálido · el bordón grave es el promedio de los años 80',
   },
   ru: {
+    theme: 'Слушать нашу тему', themeStop: 'Остановить тему', themeBy: 'Оригинальная музыка нашего участника команды',
     failStart: 'Не удалось включить звук на этом устройстве. Нажмите ещё раз или выберите «Исследовать без звука».', tapAgain: 'Нажмите ещё раз, чтобы включить звук. На iPhone также проверьте бесшумный режим и громкость.',
     legend1: 'Звуковая легенда · 1 из 2', legend2: 'Звуковая легенда · 2 из 2', lowest: 'Самая низкая нота', highest: 'Самая высокая нота', means: 'означает', now: 'Теперь слушайте', sweep: 'Развёртка идёт с запада на восток', loading: 'Загрузка звуков…',
     q: 'А что, если бы вы могли услышать, как меняется наша планета?',

@@ -938,6 +938,46 @@ function syncIntroInert() {
 new MutationObserver(syncIntroInert).observe(el.intro, { attributes: true, attributeFilter: ['hidden'] });
 syncIntroInert();
 
+// ---------- Theme song on the start screen (original music by Ali Aliyev) ----------
+const theme = { btn: $('theme'), audio: $('theme-audio'), time: $('theme-time'), bar: $('theme-bar'), fade: 0 };
+theme.audio.volume = 0.8; // the file is mastered to about -16 LUFS, like the scene recordings
+const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function themeUI() {
+  const on = !theme.audio.paused;
+  theme.btn.setAttribute('aria-pressed', String(on));
+  theme.btn.querySelector('[data-i18n]').textContent = t(on ? 'themeStop' : 'theme');
+}
+function stopTheme(fadeMs = 600) {
+  const a = theme.audio;
+  if (a.paused) return;
+  cancelAnimationFrame(theme.fade);
+  const v0 = a.volume, t0 = performance.now();
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / fadeMs);
+    a.volume = v0 * (1 - k);
+    if (k < 1) theme.fade = requestAnimationFrame(step);
+    else { a.pause(); a.volume = v0; themeUI(); }
+  };
+  theme.fade = requestAnimationFrame(step);
+}
+theme.btn.addEventListener('click', () => {
+  if (theme.audio.paused) {
+    if (theme.audio.ended || theme.audio.currentTime >= theme.audio.duration - 0.1) theme.audio.currentTime = 0;
+    theme.audio.play().then(themeUI).catch(themeUI);
+  } else stopTheme(250);
+});
+theme.audio.addEventListener('play', themeUI);
+theme.audio.addEventListener('pause', themeUI);
+theme.audio.addEventListener('ended', () => { theme.audio.currentTime = 0; themeUI(); });
+theme.audio.addEventListener('timeupdate', () => {
+  const a = theme.audio, d = a.duration || 48;
+  theme.time.textContent = a.paused && !a.currentTime ? fmtTime(d) : fmtTime(d - a.currentTime);
+  theme.bar.style.width = `${(a.currentTime / d) * 100}%`;
+});
+// Entering the map (with or without sound) fades the theme out so it never plays over the data.
+el.start.addEventListener('click', () => stopTheme(), { capture: true });
+$('visual-only').addEventListener('click', () => stopTheme(), { capture: true });
+
 // ---------- Interface language ----------
 function pickLang() {
   if (settings.lang && LANGS[settings.lang]) return settings.lang;
@@ -951,6 +991,7 @@ function renderLang() {
   const playing = el.play.getAttribute('aria-pressed') === 'true';
   el.play.querySelector('span').textContent = t(playing ? 'pause' : state.finished ? 'again' : 'play');
   el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('cta');
+  themeUI();
   if (state.scene) $('scene-listen').textContent = t('listen.' + state.scene.id);
 }
 setLang(pickLang());

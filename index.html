@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261114211225">
+  <link rel="stylesheet" href="css/style.css?v=20261114213341">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -32,6 +32,17 @@
         <li><b data-i18n="s3b">3 · Numbers become music</b><span data-i18n="s3">A high value plays a high note. West sounds in your left ear, east in your right. Silence means no data.</span></li>
       </ol>
       <p class="intro-sub"><span data-i18n="sub">Headphones recommended · Each scene starts by playing its lowest and highest note</span> · <kbd>H</kbd></p>
+      <div class="theme">
+        <button id="theme" class="theme-btn" type="button" aria-pressed="false" aria-describedby="theme-by">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="i-pause"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          <span data-i18n="theme">Play our theme song</span>
+          <span class="theme-time" id="theme-time" aria-hidden="true">0:48</span>
+        </button>
+        <p id="theme-by" class="theme-by"><span data-i18n="themeBy">Original music by our teammate</span> Ali Aliyev</p>
+        <span class="theme-bar" aria-hidden="true"><i id="theme-bar"></i></span>
+        <audio id="theme-audio" src="assets/audio/theme.m4a" preload="none"></audio>
+      </div>
       <div class="intro-langs" role="group" aria-label="Language · Dil · Idioma · Язык">
         <button type="button" data-lang="en" lang="en" aria-pressed="false">English</button>
         <button type="button" data-lang="az" lang="az" aria-pressed="false">Azərbaycanca</button>
@@ -236,7 +247,7 @@
       <div><h3>The problem</h3><p>NASA's Earth Information Center shows how our planet is changing through beautiful visualizations, but only to people who can see them. More than 2.2 billion people live with a vision impairment (WHO), and many more learn better by listening.</p></div>
       <div><h3>Our answer</h3><p>Polyphonic Earth reads every frame of NASA visualizations and NASA POWER data and plays them as music in real time. Pitch, loudness, rhythm and stereo carry the data; descriptions, Listen by Touch and a visual mode make it usable with or without sight or hearing.</p></div>
       <div><h3>Why accessibility</h3><p>Climate data belongs to everyone. Designing for blind and deaf visitors first gave us features that help every listener: a sound legend before the music, layers that enter one at a time, and plain explanations of what each sound means.</p></div>
-      <div><h3>Team</h3><p>Open Guys AI, NASA Space Apps Challenge 2026, Mingachevir, Azerbaijan. Built with open NASA data, Tone.js and an AI coding assistant; the concept, data choices, sound design decisions and testing are ours.</p></div>
+      <div><h3>Team</h3><p>Open Guys AI, NASA Space Apps Challenge 2026, Mingachevir, Azerbaijan. The start-screen theme song is an original composition by our teammate Ali Aliyev. Built with open NASA data, Tone.js and an AI coding assistant; the concept, data choices, sound design decisions and testing are ours.</p></div>
     </div>
     <p class="about-links small"><a href="https://github.com/amil060/polyphonic-earth">Source code on GitHub</a> · Demo video: added with the final submission</p>
   </section>
@@ -273,6 +284,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261114211225"></script>
+  <script type="module" src="js/main.js?v=20261114213341"></script>
 </body>
 </html>

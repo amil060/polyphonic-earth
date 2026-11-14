@@ -33,6 +33,9 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 ### Recordings
 Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac).
 
+### Theme song
+The start screen has an optional theme song, **"Polyphonic Earth"**, an original composition by our teammate **Ali Aliyev** ([theme.m4a](assets/audio/theme.m4a), 48 s). It plays only when you press its button and fades out as soon as you enter the map, so it never plays over the data.
+
 ### Signature features
 - **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value.
 - **Stereo map:** in every scene, west sounds on the left and east on the right.
@@ -94,6 +97,8 @@ All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization 
 - NASA GIBS, MODIS Terra corrected reflectance of the Caspian region (15 July 2023): https://gibs.earthdata.nasa.gov/
 - Caspian sea-level context in the Caspian summary: Chen, J. L. et al. (2017), Long-term Caspian Sea level change, *Geophysical Research Letters*, doi:10.1002/2017GL073958
 - Inspiration: NASA "Data Sonification: Caldwell 73": https://svs.gsfc.nasa.gov/13786/
+
+**Music:** start-screen theme "Polyphonic Earth" © 2026 Ali Aliyev, used with permission.
 
 **Software:** Tone.js (MIT). Fonts: IBM Plex Sans and IBM Plex Mono (Google Fonts, OFL).
 
