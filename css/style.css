@@ -101,7 +101,8 @@ kbd {
 .play-ring:hover { background: #ffffff; }
 .play-ring:active { transform: scale(0.97); }
 .play-ring svg { width: 30px; height: 30px; fill: currentColor; }
-.play-ring { width: auto; height: 72px; border-radius: 36px; padding: 0 32px 0 24px; display: inline-flex; gap: 12px; font: 500 20px var(--font); }
+.play-ring { width: auto; height: 72px; border-radius: 36px; padding: 0 32px 0 24px; display: inline-flex; align-items: center; gap: 12px; font: 500 20px var(--font); }
+.play-ring:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 36px; }
 .play-ring[disabled] { opacity: .7; cursor: progress; }
 .intro-line { font-size: 20px; line-height: 28px; margin: 0; color: var(--text); }
 .intro-sub { margin: 0; color: var(--text-2); font-size: 13px; }
