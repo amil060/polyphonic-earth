@@ -76,7 +76,7 @@ export const nightlights = {
   build(engine) {
     const n = (this.nodes = {});
     n.pan = new Tone.Panner(0).connect(engine.bus);
-    n.bell = new Tone.PolySynth(Tone.FMSynth, {
+    n.bell = new Tone.PolySynth(Tone.FMSynth, { maxPolyphony: 8,
       harmonicity: 3.01, modulationIndex: 4,
       envelope: { attack: 0.004, decay: 1.6, sustain: 0, release: 3 },
       modulationEnvelope: { attack: 0.004, decay: 0.6, sustain: 0, release: 1.5 },
@@ -87,7 +87,7 @@ export const nightlights = {
       envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 },
       volume: -26,
     }).connect(n.padFilter);
-    n.drone = new Tone.Synth({
+    n.drone = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3,
       oscillator: { type: 'fatsine', count: 2, spread: 8 },
       envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 },
       volume: -28,
@@ -109,7 +109,7 @@ export const nightlights = {
   },
 
   reference(v, time) {
-    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.pan.pan.rampTo(0, 0.06, time);
     this.nodes.bell.triggerAttackRelease([micro(v, this.scale, this.base)], '4n', time, 0.3 + v * 0.6);
   },
 
@@ -126,7 +126,7 @@ export const nightlights = {
   onStep(col, time, on) {
     if (!on('melody')) return 0;
     const { pan, bell, fall } = this.nodes;
-    pan.pan.setValueAtTime(panOf(col.x), time);
+    pan.pan.rampTo(panOf(col.x), 0.06, time);
     if (this.mode === 'change') {
       if (col.coverage < 0.004) return 0;
       if (col.mean > 0.55) {

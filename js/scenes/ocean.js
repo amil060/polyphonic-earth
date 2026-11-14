@@ -67,7 +67,7 @@ export const ocean = {
       envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 5 },
       volume: -24,
     }).connect(n.padFilter);
-    n.bass = new Tone.Synth({
+    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3,
       oscillator: { type: 'sine' },
       envelope: { attack: 1.5, decay: 0.5, sustain: 0.9, release: 4 },
       volume: -28,
@@ -82,7 +82,7 @@ export const ocean = {
   pitch(v) { return micro(clamp01((v - 0.3) / 0.6), this.scale, 45, 3); },
 
   reference(v, time) {
-    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.pan.pan.rampTo(0, 0.06, time);
     this.nodes.lead.triggerAttackRelease(micro(v, this.scale, 45, 3), '2n', time, 0.7);
   },
 
@@ -98,7 +98,7 @@ export const ocean = {
     if (!on('melody')) return 0;
     if (col.coverage < 0.12) { engine.knockAt(col.x, time); return 0; } // land
     const vel = 0.3 + col.coverage * 0.6;
-    this.nodes.pan.pan.setValueAtTime(panOf(col.x), time);
+    this.nodes.pan.pan.rampTo(panOf(col.x), 0.06, time);
     this.nodes.lead.triggerAttackRelease(this.pitch(col.mean), '4n', time, vel);
     return vel;
   },

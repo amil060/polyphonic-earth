@@ -62,14 +62,14 @@ export const co2 = {
       filterEnvelope: { attack: 0.05, decay: 0.4, sustain: 0.4, baseFrequency: 500, octaves: 2.5 },
       volume: -10,
     }).connect(n.vib);
-    n.bass = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 }, volume: -28 }).connect(engine.bus);
+    n.bass = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 3, oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 0.5, sustain: 0.9, release: 4 }, volume: -28 }).connect(engine.bus);
     n.hazeGain = new Tone.Gain(0).connect(engine.bus);
     n.hazeFilter = new Tone.Filter(350, 'lowpass').connect(n.hazeGain);
     n.haze = new Tone.Noise('brown').connect(n.hazeFilter).start();
   },
 
   reference(v, time) {
-    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.pan.pan.rampTo(0, 0.06, time);
     this.nodes.lead.triggerAttackRelease(micro(v, this.scale, this.base), '2n', time, 0.7);
   },
 
@@ -89,7 +89,7 @@ export const co2 = {
 
   onStep(col, time, on) {
     if (!on('melody') || col.coverage < 0.05) return 0;
-    this.nodes.pan.pan.setValueAtTime(panOf(col.x), time);
+    this.nodes.pan.pan.rampTo(panOf(col.x), 0.06, time);
     const vel = 0.3 + col.mean * 0.5;
     this.nodes.lead.triggerAttackRelease(micro(col.mean, this.scale, this.base), '4n', time, vel);
     return vel;

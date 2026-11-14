@@ -48,13 +48,21 @@ export class Engine {
 
   async start() {
     if (this.started) return;
+    // 48 kHz with a playback latency hint: half the DSP work of a 96 kHz device default,
+    // which removes the dropouts (heard as crackle) on slower laptops.
+    try {
+      const native = new AudioContext({ sampleRate: 48000, latencyHint: 'playback' });
+      Tone.setContext(new Tone.Context({ context: native, lookAhead: 0.2 }));
+    } catch {
+      Tone.getContext().lookAhead = 0.2; // browser refused the sample rate: keep the default context
+    }
     await Tone.start();
     // Visual callbacks (legend text, ripples) must not be dropped when the tab's frames lag.
-    Tone.Draw.expiration = 5;
+    Tone.getContext().draw.expiration = 5;
     this.limiter = new Tone.Limiter(-3).toDestination();
     this.master = new Tone.Volume(-8).connect(this.limiter);
     // Ambient, cinematic room: long tail, a little pre-delay so notes stay clear.
-    this.reverb = new Tone.Reverb({ decay: 9, preDelay: 0.04, wet: 0.42 }).connect(this.master);
+    this.reverb = new Tone.Reverb({ decay: 6, preDelay: 0.04, wet: 0.4 }).connect(this.master);
     await this.reverb.generate();
     this.bus = new Tone.Gain(1).connect(this.reverb); // scenes connect here
     this.dry = new Tone.Gain(0.6).connect(this.master); // for clicks that should stay close

@@ -48,10 +48,12 @@ export const lightning = {
   build(engine) {
     const n = (this.nodes = {});
     n.pan = new Tone.Panner(0).connect(engine.bus);
-    n.drum = new Tone.MembraneSynth({
+    // Polyphonic, so a new hit never cuts off the tail of the previous one (that cut was a click).
+    n.drum = new Tone.PolySynth(Tone.MembraneSynth, {
+      maxPolyphony: 6,
       pitchDecay: 0.08, octaves: 4,
-      envelope: { attack: 0.002, decay: 0.9, sustain: 0, release: 0.8 },
-      volume: -8,
+      envelope: { attack: 0.005, decay: 0.9, sustain: 0, release: 0.8 },
+      volume: -11,
     }).connect(n.pan);
     n.padFilter = new Tone.Filter(900, 'lowpass').connect(engine.bus);
     n.pad = new Tone.PolySynth(Tone.AMSynth, {
@@ -67,7 +69,7 @@ export const lightning = {
   },
 
   reference(v, time) {
-    this.nodes.pan.pan.setValueAtTime(0, time);
+    this.nodes.pan.pan.rampTo(0, 0.06, time);
     this.nodes.drum.triggerAttackRelease(micro(v, this.scale, this.base), '4n', time, 0.8);
   },
 
@@ -75,22 +77,22 @@ export const lightning = {
     const n = this.nodes;
     const activity = clamp01(stats.coverage * 60);
     if (on('harmony')) n.pad.triggerAttackRelease(microChord(0, [0, 2, 3], this.scale, 45), '1m', time, 0.4 + activity * 0.3);
-    n.thunderGain.gain.cancelScheduledValues(time);
+    // Hold the current level instead of jumping to zero, so a new swell never clicks.
+    n.thunderGain.gain.cancelAndHoldAtTime(time);
     if (on('bass') && activity > 0.2) {
-      n.thunderGain.gain.setValueAtTime(0, time);
-      n.thunderGain.gain.linearRampToValueAtTime(0.35 * activity, time + 0.6);
+      n.thunderGain.gain.linearRampToValueAtTime(0.3 * activity, time + 0.6);
       n.thunderGain.gain.linearRampToValueAtTime(0, time + 2.8);
     } else {
-      n.thunderGain.gain.rampTo(0, 0.5, time);
+      n.thunderGain.gain.linearRampToValueAtTime(0, time + 0.5);
     }
     n.rainGain.gain.rampTo(on('texture') ? activity * 0.2 : 0, 2, time);
   },
 
   onStep(col, time, on) {
     if (!on('melody') || col.coverage < 0.0015) return 0;
-    this.nodes.pan.pan.setValueAtTime(panOf(col.x), time);
+    this.nodes.pan.pan.rampTo(panOf(col.x), 0.06, time);
     const fromEquator = clamp01(Math.abs(col.lat - 0.5) * 3);
-    const vel = clamp01(0.35 + Math.sqrt(col.coverage) * 4);
+    const vel = Math.min(0.85, 0.35 + Math.sqrt(col.coverage) * 4);
     this.nodes.drum.triggerAttackRelease(micro(fromEquator, this.scale, this.base), '8n', time, vel);
     return vel;
   },

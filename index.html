@@ -24,7 +24,13 @@
         <span class="sr-only">Start listening</span>
       </button>
       <p id="intro-desc" class="intro-line">Press play to hear our planet change</p>
-      <p class="intro-sub">NASA Earth data, played as live music · Headphones recommended · <kbd>H</kbd> for keys</p>
+      <p class="intro-why">A jukebox that turns NASA's pictures of Earth into music, so anyone, including people who are blind, can explore our changing planet by ear.</p>
+      <ol class="intro-steps" aria-label="How it works">
+        <li><b>1 · NASA pictures</b><span>Real NASA animations: ocean temperature, city lights at night, lightning and CO₂.</span></li>
+        <li><b>2 · Colours become numbers</b><span>The app reads the colour of every pixel and turns it back into the data it shows.</span></li>
+        <li><b>3 · Numbers become music</b><span>A high value plays a high note. West sounds in your left ear, east in your right. Silence means no data.</span></li>
+      </ol>
+      <p class="intro-sub">Headphones recommended · Each scene starts by playing its lowest and highest note · <kbd>H</kbd> for keys</p>
     </div>
   </div>
 
@@ -36,9 +42,12 @@
         <p class="brand-sub">An Earth Jukebox · NASA EIC data, sonified live</p>
       </div>
     </div>
-    <button id="help-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
-      Keyboard <kbd>H</kbd>
-    </button>
+    <div class="top-actions">
+      <button id="about-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">What is this?</button>
+      <button id="help-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
+        Keyboard <kbd>H</kbd>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -57,6 +66,7 @@
           <div class="scene-card">
             <h2 id="scene-title">Scene</h2>
             <p id="scene-sub"></p>
+            <p id="scene-listen" class="scene-listen"></p>
           </div>
           <div class="readout" aria-hidden="true">
             <span class="live-dot" id="live-dot">Live</span>
@@ -66,6 +76,19 @@
           </div>
         </div>
         <div id="touch-badge" class="badge" hidden>Listen by Touch · arrows or pointer</div>
+
+        <!-- Sound legend callout: explains the lowest and highest note before the music starts -->
+        <div id="callout" class="callout" aria-hidden="true" hidden>
+          <p class="callout-step" id="callout-step"></p>
+          <div class="callout-main">
+            <span class="callout-chip" id="callout-chip"></span>
+            <div>
+              <p class="callout-title" id="callout-title"></p>
+              <p class="callout-meaning" id="callout-meaning"></p>
+            </div>
+          </div>
+          <div class="callout-meter" aria-hidden="true"><i id="callout-bar"></i></div>
+        </div>
 
         <!-- Scene picker: layer pills stacked on the map edge -->
         <nav class="hud-side" aria-label="Scenes">

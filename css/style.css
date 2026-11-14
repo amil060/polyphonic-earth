@@ -88,7 +88,7 @@ kbd {
 .intro-card { text-align: center; display: grid; justify-items: center; gap: 20px; }
 .intro h1 { font-size: clamp(40px, 7vw, 64px); letter-spacing: -0.02em; color: var(--text); margin-top: -8px; }
 .intro h1 span { color: var(--accent); }
-.logo-xl { width: 72px; height: 96px; }
+.logo.logo-xl { width: 72px; height: 96px; }
 .logo-xl .logo-staff { stroke-width: 1.5; }
 .logo-xl .logo-clef { stroke-width: 8; }
 .play-ring {
@@ -104,6 +104,14 @@ kbd {
 .play-ring[disabled] { opacity: .7; cursor: progress; }
 .intro-line { font-size: 20px; line-height: 28px; margin: 0; color: var(--text); }
 .intro-sub { margin: 0; color: var(--text-2); font-size: 13px; }
+.intro-card { max-width: 880px; }
+.intro-why { margin: 0; max-width: 56ch; color: var(--text-2); font-size: 16px; line-height: 24px; }
+.intro-steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; text-align: left; }
+.intro-steps li { background: rgba(17, 20, 28, 0.88); border: 1px solid var(--hair); border-radius: var(--r-card); padding: 14px 16px; display: grid; gap: 4px; }
+.intro-steps b { font-weight: 500; font-size: 14px; }
+.intro-steps span { font-size: 13px; line-height: 20px; color: var(--text-2); }
+.top-actions { display: flex; gap: 8px; }
+@media (max-width: 720px) { .intro-steps { grid-template-columns: 1fr; } .intro { align-items: start; overflow-y: auto; } }
 
 /* ---------- Header ---------- */
 .top {
@@ -155,6 +163,7 @@ kbd {
 .scene-card { max-width: 60ch; }
 .scene-card h2 { font-size: 24px; line-height: 32px; }
 .scene-card p { margin: 4px 0 0; color: var(--text-2); font-size: 14px; line-height: 20px; }
+.scene-card .scene-listen { margin-top: 8px; color: var(--text); font-size: 13px; line-height: 20px; display: inline-block; padding: 4px 10px; border-radius: 6px; background: var(--glass); border: 1px solid var(--hair); box-shadow: inset 2px 0 0 var(--accent); text-shadow: none; }
 .enter { animation: enter 360ms var(--ease) both; }
 @keyframes enter { from { opacity: 0; transform: translateY(8px); } }
 
@@ -178,6 +187,24 @@ kbd {
   box-shadow: inset 2px 0 0 var(--accent);
   padding: 4px 12px; border-radius: 6px;
 }
+
+/* Sound legend callout over the map */
+.callout {
+  position: absolute; right: 200px; top: 50%; transform: translateY(-50%); z-index: 4;
+  width: 320px; padding: 16px 20px; display: grid; gap: 12px;
+  background: rgba(11, 13, 20, 0.92); border: 1px solid var(--hair-strong); border-radius: var(--r-panel);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.callout[hidden] { display: none; }
+.callout.enter { animation: enter 300ms var(--ease) both; }
+.callout-step { margin: 0; font: 400 12px/16px var(--mono); color: var(--muted); }
+.callout-main { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: center; }
+.callout-chip { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--hair-strong); background: var(--chip, var(--accent)); }
+.callout-title { margin: 0; font-size: 22px; line-height: 28px; font-weight: 500; }
+.callout-meaning { margin: 2px 0 0; font-size: 15px; line-height: 20px; color: var(--text-2); }
+.callout-meter { position: relative; height: 4px; border-radius: 2px; background: var(--hair-strong); overflow: hidden; }
+.callout-meter i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--level, 0%); background: var(--accent); transition: width 600ms var(--ease); }
+.scale-legend.focus { border-color: var(--accent); }
 
 /* Scene picker on the left edge of the map */
 .hud-side { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); z-index: 3; isolation: isolate;
@@ -324,6 +351,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
   .hud-side .tabs { display: grid; grid-template-columns: 1fr 1fr; }
   .hud-side .tab { min-width: 0; white-space: nowrap; }
   .scale-legend { display: none; }
+  .callout { position: static; transform: none; width: auto; margin: 12px 16px 0; }
   .timeline { grid-template-columns: auto 1fr auto; padding: 8px; }
   .timeline .track, .timeline .check { grid-column: 1 / -1; }
   .ticks button:nth-child(even) { visibility: hidden; }

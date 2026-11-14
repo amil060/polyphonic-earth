@@ -68,6 +68,9 @@ js/scenes/*.js    one file per scene: colour rules + instruments + descriptions
 assets/data/      NASA media (downscaled copies)
 ```
 
+### Audio quality check
+`node tools/audio-qa.mjs assets/audio/*.flac` scans recordings for clicks, clipping, dropouts and DC offset and prints timestamps. We used it to find and remove crackle: pan jumps under ringing notes, drum hits cutting off their own tails, and a gain envelope that snapped to zero.
+
 ### Run locally
 ```bash
 python -m http.server 8123

@@ -166,6 +166,9 @@ async function selectScene(i) {
   el.tm.hidden = s !== nightlights;
   el.sparkWrap.hidden = s !== nightlights;
   applyScale();
+  hideCallout();
+  $('scene-listen').textContent = LISTEN[s.id];
+  el.readoutValue.textContent = '—';
   state.layers = new Set();
   renderLayers();
   el.frame.style.setProperty('--ar', s === ocean || s === lightning ? '2' : String(16 / 9));
@@ -181,7 +184,7 @@ async function selectScene(i) {
   analyzer.ready = false;
   if (engine.started) {
     s.build(engine);
-    Tone.Transport.bpm.value = s.bpm;
+    Tone.getContext().transport.bpm.value = s.bpm;
   }
   setLive(`${s.title}. ${s.subtitle} ${wasPlaying ? 'Playing now.' : 'Press Space to play.'}`);
   if (wasPlaying) play();
@@ -216,6 +219,37 @@ function applyScale() {
   $('scale-top').innerHTML = `<b>${ui.top[0]}</b>${ui.top[1]}`;
   $('scale-bottom').innerHTML = `<b>${ui.bottom[0]}</b>${ui.bottom[1]}`;
 }
+// One plain line per scene: what the sound means. Shown under the title and after the sound legend.
+const LISTEN = {
+  ocean: 'High note = warm water · low note = cold water · soft knock = land · left ear = west',
+  nightlights: 'Louder, higher bell = brighter city · the drone rises as the world gets brighter · left ear = the Americas',
+  lightning: 'Each drum hit = lightning · deep boom = tropical storm · higher drum = far from the equator',
+  co2: 'Higher note = more CO₂ · the chord shimmers and beats as CO₂ rises · rumble = how much is covered',
+};
+
+function showCallout(kind) {
+  const s = state.scene;
+  const box = $('callout');
+  const ui = SCALE_UI[s === nightlights && nightlights.mode === 'change' ? 'change' : s.id];
+  const set = (step, title, meaning, chip, level) => {
+    $('callout-step').textContent = step;
+    $('callout-title').textContent = title;
+    $('callout-meaning').textContent = meaning;
+    $('callout-chip').style.setProperty('--chip', chip);
+    $('callout-bar').parentElement.style.setProperty('--level', level);
+  };
+  if (kind === 'low') set('Sound legend · 1 of 2', 'Lowest note', `means ${s.refLabels[0]}`, ui.grad[ui.grad.length - 1], '6%');
+  else if (kind === 'high') set('Sound legend · 2 of 2', 'Highest note', `means ${s.refLabels[1]}`, ui.grad[0], '100%');
+  else set('Now listen', 'The sweep plays west → east', LISTEN[s.id], s.accent, '50%');
+  box.hidden = false;
+  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+  $('scale').classList.toggle('focus', kind !== 'go');
+}
+function hideCallout() {
+  $('callout').hidden = true;
+  $('scale').classList.remove('focus');
+}
+
 function setMark(v) {
   const m = $('scale-mark');
   m.hidden = v == null;
@@ -252,10 +286,10 @@ function ensureLoop() {
       const k = state.refStep++;
       if (k === 0) {
         s.reference(0, time);
-        Tone.Draw.schedule(() => { setMark(0); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`); }, time);
       } else if (k === 4) {
         s.reference(1, time);
-        Tone.Draw.schedule(() => { setMark(1); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`); }, time);
       }
       return;
     }
@@ -263,6 +297,8 @@ function ensureLoop() {
     state.step = (state.step + 1) % STEPS;
     if (state.step === 0) {
       state.bar++;
+      if (state.bar === 1) Tone.getContext().draw.schedule(() => showCallout('go'), time);
+      if (state.bar === 3) Tone.getContext().draw.schedule(hideCallout, time);
       // Layers enter one at a time: melody alone, then harmony, bass and texture every two bars.
       if (!state.layerManual) {
         const want = Math.min(s.layers.length, 1 + Math.floor((state.bar - 1) / 2));
@@ -270,24 +306,24 @@ function ensureLoop() {
         s.layers.slice(0, want).forEach((l) => state.layers.add(l.id));
         if (state.layers.size !== before) {
           const added = s.layers[want - 1].label;
-          Tone.Draw.schedule(() => { renderLayers(); el.probeLive.textContent = `${added} joins.`; }, time);
+          Tone.getContext().draw.schedule(() => { renderLayers(); el.probeLive.textContent = `${added} joins.`; }, time);
         }
       }
       s.onBar(state.stats, time, layerOn);
       if (s === nightlights && el.autoyear.checked && state.bar % 2 === 0) {
-        Tone.Draw.schedule(() => showYear(state.yearIndex + 1), time);
+        Tone.getContext().draw.schedule(() => showYear(state.yearIndex + 1), time);
       }
-      if (state.bar % 8 === 1) Tone.Draw.schedule(() => describeNow(), time);
+      if (state.bar % 8 === 1) Tone.getContext().draw.schedule(() => describeNow(), time);
     }
     const col = state.cols[state.step];
     const hit = col ? s.onStep(col, time, layerOn, engine) : 0;
-    Tone.Draw.schedule(() => {
+    Tone.getContext().draw.schedule(() => {
       if (hit) addRipple(col.x, col.lat, hit, col);
       pushTrace(hit || 0);
       drawTrace();
     }, time);
     const step = state.step;
-    Tone.Draw.schedule(() => { state.drawStep = step; }, time);
+    Tone.getContext().draw.schedule(() => { state.drawStep = step; }, time);
   }, '8n').start(0);
 }
 
@@ -329,7 +365,7 @@ function play() {
   if (!state.scene.nodes) state.scene.build(engine);
   if (state.needsIntro) { startIntro(); state.needsIntro = false; }
   ensureLoop();
-  Tone.Transport.start('+0.05');
+  Tone.getContext().transport.start('+0.05');
   if (state.scene.media.type === 'video') el.video.play().catch(() => {});
   state.playing = true;
   state.playStart = performance.now();
@@ -340,7 +376,7 @@ function play() {
 }
 
 function pause() {
-  Tone.Transport.pause();
+  Tone.getContext().transport.pause();
   el.video.pause();
   state.playing = false;
   state.drawStep = undefined;
@@ -492,16 +528,29 @@ function draw() {
 requestAnimationFrame(draw);
 
 // ---------- Controls ----------
+// "What is this?" reopens the start screen; once sound is running, its play button just closes it.
+$('about-btn').addEventListener('click', () => {
+  el.intro.hidden = false;
+  $('intro-desc').textContent = engine.started ? 'Press play to go back to the map' : 'Press play to hear our planet change';
+  el.start.focus();
+});
 el.start.addEventListener('click', async () => {
+  if (engine.started) {
+    el.intro.hidden = true;
+    el.stage.focus({ preventScroll: true });
+    if (!state.playing) play();
+    return;
+  }
   el.start.disabled = true;
   el.start.querySelector('.sr-only').textContent = 'Loading sounds';
   $('intro-desc').textContent = 'Loading sounds…';
   await engine.start();
   engine.setVolume(Number(el.volume.value));
   el.intro.hidden = true;
+  el.start.disabled = false;
   if (!state.scene) await selectScene(0);
   else state.scene.build(engine);
-  Tone.Transport.bpm.value = state.scene.bpm;
+  Tone.getContext().transport.bpm.value = state.scene.bpm;
   el.stage.focus({ preventScroll: true });
   play();
 });
@@ -516,7 +565,10 @@ el.yearPrev.addEventListener('click', () => showYear(state.yearIndex - 1));
 el.yearNext.addEventListener('click', () => showYear(state.yearIndex + 1));
 
 document.addEventListener('keydown', (e) => {
-  if (!el.intro.hidden) return;
+  if (!el.intro.hidden) {
+    if (e.key === 'Escape' && engine.started) el.intro.hidden = true;
+    return;
+  }
   if (el.help.open) return;
   const tag = e.target.tagName;
   const inField = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
