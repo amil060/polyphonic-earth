@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polyphonic Earth</title>
+  <meta name="description" content="Polyphonic Earth: an accessible Earth Jukebox that turns NASA Earth Information Center visualizations into real-time music.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230b1530' stroke='%2367e8f9' stroke-width='2'/%3E%3Cpath d='M6 17c3-6 5 6 8 0s5 6 8 0 4 4 4 4' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#stage">Skip to the visualization</a>
+
+  <!-- Start gate: one play button (audio needs a user gesture). The live map shows through behind it. -->
+  <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" aria-describedby="intro-desc">
+    <div class="intro-card">
+      <h1 id="intro-title">Polyphonic <span>Earth</span></h1>
+      <button id="start" class="play-ring" type="button" aria-describedby="intro-desc">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span class="sr-only">Start listening</span>
+      </button>
+      <p id="intro-desc" class="intro-line">Press play to hear our planet change</p>
+      <p class="intro-sub">NASA Earth data, played as live music · Headphones recommended · <kbd>H</kbd> for keys</p>
+    </div>
+  </div>
+
+  <header class="top">
+    <div class="brand">
+      <svg aria-hidden="true" viewBox="0 0 32 32" class="logo"><circle cx="16" cy="16" r="13"/><path d="M6 17c3-6 5 6 8 0s5 6 8 0 4 4 4 4"/></svg>
+      <div>
+        <p class="brand-name">Polyphonic Earth</p>
+        <p class="brand-sub">An Earth Jukebox · NASA EIC data, sonified live</p>
+      </div>
+    </div>
+    <button id="help-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
+      Keyboard <kbd>H</kbd>
+    </button>
+  </header>
+
+  <main>
+    <!-- Hero: the map fills the screen, controls float over it -->
+    <section class="hero" aria-labelledby="scene-title">
+      <div id="frame" class="frame">
+        <div id="stage" class="stage" tabindex="0" role="application"
+             aria-roledescription="sonified map"
+             aria-label="Visualization. Press T for Listen by Touch, then use arrow keys to explore. Space plays or pauses.">
+          <video id="video" muted loop playsinline preload="auto" aria-hidden="true"></video>
+          <img id="still" alt="" aria-hidden="true">
+          <canvas id="overlay" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="hud hud-top">
+          <div class="scene-card">
+            <h2 id="scene-title">Scene</h2>
+            <p id="scene-sub"></p>
+          </div>
+          <div class="readout" aria-hidden="true">
+            <span class="live-dot" id="live-dot">Live</span>
+            <span id="readout-label">Now playing</span>
+            <strong id="readout-value">—</strong>
+            <span id="npm" class="npm"></span>
+          </div>
+        </div>
+        <div id="touch-badge" class="badge" hidden>Listen by Touch · arrows or pointer</div>
+
+        <!-- Scene picker: layer pills stacked on the map edge -->
+        <nav class="hud-side" aria-label="Scenes">
+          <span id="tab-glider" class="tab-glider" aria-hidden="true"></span>
+          <ul id="scene-tabs" class="tabs" role="tablist" aria-orientation="vertical"></ul>
+        </nav>
+
+        <!-- Colour → sound scale for the current scene; the marker follows the value being played -->
+        <div id="scale" class="scale-legend" aria-hidden="true">
+          <span id="scale-top" class="scale-label"></span>
+          <div class="scale-bar" id="scale-bar"><i id="scale-mark" class="scale-mark"></i></div>
+          <span id="scale-bottom" class="scale-label"></span>
+        </div>
+
+        <div class="hud hud-bottom">
+          <!-- Time Machine: full-width timeline (Night Lights only) -->
+          <div id="timeline" class="timeline" role="group" aria-label="Time Machine" hidden>
+            <button id="year-prev" class="icon-btn" type="button" aria-label="Previous year">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+            <output id="year-out" for="year" class="year-big">2012</output>
+            <button id="year-next" class="icon-btn" type="button" aria-label="Next year">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+            <div class="track">
+              <input id="year" type="range" min="2012" max="2024" step="1" value="2012"
+                     aria-label="Year" aria-valuetext="2012" aria-describedby="tm-help">
+              <div id="ticks" class="ticks"></div>
+            </div>
+            <label class="check" title="Auto-advance one year every two bars">
+              <input id="autoyear" type="checkbox" checked> Auto
+            </label>
+          </div>
+
+          <div class="controls" role="group" aria-label="Player controls">
+            <button id="play" class="btn btn-primary" type="button" aria-pressed="false">
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="i-pause"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+              <span>Play</span> <kbd>Space</kbd>
+            </button>
+            <button id="touch" class="btn" type="button" aria-pressed="false">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 11V5a2 2 0 0 1 4 0v5m0 0V4a2 2 0 0 1 4 0v8m-8-1V8a2 2 0 0 0-4 0v7a7 7 0 0 0 14 0v-3"/></svg>
+              Listen by Touch <kbd>T</kbd>
+            </button>
+            <button id="describe" class="btn" type="button">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+              Describe <kbd>D</kbd>
+            </button>
+            <label class="vol">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6"/></svg>
+              <span class="sr-only">Volume</span>
+              <input id="volume" type="range" min="0" max="100" value="70" aria-label="Volume">
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Oscilloscope trace of the notes just played (signature: the sweep line) -->
+    <div class="wave-divider" aria-hidden="true">
+      <svg id="waves" viewBox="0 0 1440 120" preserveAspectRatio="none"></svg>
+    </div>
+
+    <!-- Below the map: explanation, live description, data source -->
+    <section class="info" aria-label="What am I hearing?">
+      <div class="info-main">
+        <h2>What am I hearing?</h2>
+        <ul id="legend" class="legend"></ul>
+      </div>
+      <div class="info-side">
+        <h3>Live description</h3>
+        <p id="live" class="live" aria-live="polite" aria-atomic="true">Press Play to begin.</p>
+        <p id="probe-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+
+        <h3>Sonification log</h3>
+        <ol id="log" class="log" role="log" aria-live="off" aria-label="Most recent notes and the data behind them">
+          <li class="log-empty">Notes appear here as the sweep plays them.</li>
+        </ol>
+
+        <figure id="spark-wrap" class="spark" hidden>
+          <figcaption class="small muted">Total detected night light per year, measured from the NASA frames by this app</figcaption>
+          <svg id="sparkline" viewBox="0 0 300 70" role="img" aria-label="Chart of total detected night light from 2012 to 2023"></svg>
+          <p id="tm-help" class="muted small">Use <kbd>[</kbd> and <kbd>]</kbd> to step years. The last stop, "Change", plays what grew brighter (purple) and darker (orange) between 2012 and 2023.</p>
+        </figure>
+
+        <h3>Data source</h3>
+        <p id="credit" class="small"></p>
+
+        <details class="how">
+          <summary>How the sonification works</summary>
+          <p class="small">Each frame of the NASA visualization is drawn into a hidden canvas and analysed pixel by pixel (192 × 96 grid). The pixel colours are converted back into data values using the visualization's own colour scale. A sweep moves from west to east once per bar. Each of the 16 slices of the map becomes a note: its value sets the pitch, how much of it contains data sets the loudness, and its position sets the stereo pan. Every note is snapped to a musical scale so the result is music, not noise. Silence means there is no data, for example land in the ocean scene.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p class="small muted">Built for the 2026 NASA Space Apps Challenge by team <strong>Open Guys AI</strong> (Mingachevir, Azerbaijan). Visualizations courtesy of NASA's Scientific Visualization Studio / Earth Information Center. Audio: <a href="https://tonejs.github.io/">Tone.js</a>.</p>
+  </footer>
+
+  <dialog id="help" aria-labelledby="help-title">
+    <h2 id="help-title">Keyboard shortcuts</h2>
+    <dl class="keys">
+      <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Choose a scene</dd>
+      <dt><kbd>Space</kbd></dt><dd>Play / pause the jukebox</dd>
+      <dt><kbd>T</kbd></dt><dd>Toggle Listen by Touch</dd>
+      <dt><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move the touch cursor (hold <kbd>Shift</kbd> for big steps)</dd>
+      <dt><kbd>D</kbd></dt><dd>Describe what is playing now</dd>
+      <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous / next year (Night Lights)</dd>
+      <dt><kbd>-</kbd> <kbd>=</kbd></dt><dd>Volume down / up</dd>
+      <dt><kbd>H</kbd></dt><dd>Show this help</dd>
+    </dl>
+    <form method="dialog"><button class="btn btn-primary">Close</button></form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
