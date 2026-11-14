@@ -6,7 +6,7 @@
 
 Built for the **2026 NASA Space Apps Challenge**, challenge *"The Earth Information Jukebox"*, by team **Open Guys AI** (Mingachevir, Azerbaijan).
 
-> **Live demo:** _add the GitHub Pages link here_ · **Demo video (30 s):** _add link here_
+> **Live demo:** https://amil060.github.io/polyphonic-earth/ · **Code:** https://github.com/amil060/polyphonic-earth · **Demo video (30 s):** _add link here_
 
 ---
 
