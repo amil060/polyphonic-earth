@@ -46,7 +46,7 @@
 ## 4. Technical architecture
 - **Stack:** vanilla HTML/CSS/JS (ES modules) + **Tone.js 14.7.77** (CDN, pinned). No build step: fast and reliable.
 - **Analysis:** `<video>`/`<img>` → hidden `<canvas>` (192×96 grid) → per-pixel data values → 8 west-to-east slices (mean, coverage, peak, latitude).
-- **Sound engine:** one file per scene with its own instrument rules. All notes are quantized to pentatonic or modal scales.
+- **Sound engine:** one file per scene with its own instrument rules. All notes are quantized to quarter-tone maqam scales with a ±25-cent data bend.
 - **Data:** downscaled MP4/JPG copies from SVS stored in the repo (NASA material, credited). Avoids CORS issues and works offline for the demo.
 - **Hosting:** GitHub Pages.
 

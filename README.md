@@ -38,15 +38,16 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 - **Stereo map:** in every scene, west sounds on the left and east on the right.
 - **Time Machine:** hear 12 years of human light. The app also *measures* total detected light per year from the NASA frames and charts it.
 - **"What am I hearing?":** a legend that explains every sound layer, plus live descriptions on demand.
-- **Musical, not noisy:** every note is snapped to a scale (pentatonic, Lydian, minor pentatonic), so the data stays listenable.
+- **Musical, not noisy:** every note is snapped to a quarter-tone maqam scale with a small data bend, so the data stays listenable.
+- **Plays once, then explains:** each scene stops at the end and shows what you heard and why it matters, with its sources.
 
 ## Accessibility
 **What we tested ourselves:** keyboard-only use of every control; automated checks for contrast (lowest text 5.05:1 on the background, WCAG AA), accessible names, heading order, 24 px minimum targets and no horizontal scrolling from 320 px to 1920 px; mono output; the visual-only mode. **Not yet verified:** a full session with a screen-reader user and NVDA/VoiceOver on real devices. That is our next step, not a claim.
 
 **For deaf and hard-of-hearing visitors:** "Explore without sound" plays the map without audio. During playback the marker on the colour scale jumps to the pitch of each note, ripples show where each note comes from and how strong it is, and the oscilloscope under the map draws the rhythm of the notes.
 
-- Fully keyboard-operable: `1`–`4` scenes, `Space` play/pause, `T` Listen by Touch, arrow keys explore, `D` describe, `[` `]` years, `-` `=` volume, `H` help.
-- `aria-live` descriptions written for screen readers, a proper tab pattern, visible focus, 44 px touch targets.
+- Fully keyboard-operable: `1`–`5` scenes, `Space` play/pause, `T` Listen by Touch, arrow keys explore, `D` describe, `[` `]` years, `-` `=` volume, `H` help.
+- `aria-live` descriptions written for screen readers, a proper tab pattern, visible focus, 24 px minimum targets (most controls 36–44 px).
 - Interface in four languages: English, Azerbaijani, Spanish and Russian (start screen, controls, sound legend and the plain-language listening guide). The choice is saved on the device. Detailed science panels and generated descriptions stay in English.
 - Respects `prefers-reduced-motion`. Output passes through a limiter for hearing safety.
 - Responsive from phone to desktop.
@@ -91,9 +92,10 @@ All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization 
 - DYAMOND Global Carbon Dioxide: https://svs.gsfc.nasa.gov/5196/
 - NASA POWER (MERRA-2) yearly air temperature and rainfall for Mingachevir, and point climatology for Listen by Touch: https://power.larc.nasa.gov/
 - NASA GIBS, MODIS Terra corrected reflectance of the Caspian region (15 July 2023): https://gibs.earthdata.nasa.gov/
+- Caspian sea-level context in the Caspian summary: Chen, J. L. et al. (2017), Long-term Caspian Sea level change, *Geophysical Research Letters*, doi:10.1002/2017GL073958
 - Inspiration: NASA "Data Sonification: Caldwell 73": https://svs.gsfc.nasa.gov/13786/
 
-**Software:** Tone.js (MIT). Fonts: Space Grotesk and Inter (Google Fonts, OFL).
+**Software:** Tone.js (MIT). Fonts: IBM Plex Sans and IBM Plex Mono (Google Fonts, OFL).
 
 ## Use of AI
 This project was developed with the help of an AI coding assistant (Anthropic Claude). The team directed the concept, data choices, sound design decisions, testing and presentation.

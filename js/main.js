@@ -488,7 +488,7 @@ const SUMMARY = {
         ? `44 years in Mingachevir, one note per year. The melody spent more and more time above the low drone of the 1980s: the last ten years averaged ${late.toFixed(1)} °C, ${(late - d.base).toFixed(1)} °C warmer than 1981–1990.`
         : 'Forty-four years in Mingachevir, one note per year, rising as the region warmed.',
       why: 'This is home for our team. A warmer region means more evaporation from rivers, reservoirs and the Caspian Sea, which matters for drinking water, farming and the Mingachevir reservoir. A 2017 study linked warming over the Caspian to a sea-level drop of about 1.5 m between 1996 and 2015.',
-      source: 'Data: NASA POWER (MERRA-2) for Mingachevir, 1981–2024; image NASA GIBS MODIS. Sea-level figure: Chen et al., Geophysical Research Letters, 2017.',
+      source: 'Data: NASA POWER (MERRA-2) for Mingachevir, 1981–2024; image NASA GIBS MODIS. Sea-level figure: Chen et al., "Long-term Caspian Sea level change", Geophysical Research Letters, 2017, doi:10.1002/2017GL073958.',
     };
   },
 };
@@ -814,7 +814,7 @@ el.yearNext.addEventListener('click', () => showYear(state.yearIndex + 1));
 
 document.addEventListener('keydown', (e) => {
   if (!el.intro.hidden) {
-    if (e.key === 'Escape' && engine.started) el.intro.hidden = true;
+    if (e.key === 'Escape' && (engine.started || state.visualOnly)) el.intro.hidden = true;
     return;
   }
   if (el.help.open || $("settings").open) return;
@@ -926,6 +926,17 @@ function drawTrace() {
   tracePoly.setAttribute('points', pts.join(' '));
 }
 drawTrace();
+
+// While the start screen is open, the page behind it is inert, so keyboard and
+// screen-reader focus stays inside the dialog (it is aria-modal).
+function syncIntroInert() {
+  const open = !el.intro.hidden;
+  for (const n of document.body.children) if (n !== el.intro && n.tagName !== 'SCRIPT' && n.tagName !== 'DIALOG') n.inert = open;
+  // Focus left inside the closed dialog would be lost: move it to the map.
+  if (!open && (document.activeElement === document.body || el.intro.contains(document.activeElement))) el.stage.focus({ preventScroll: true });
+}
+new MutationObserver(syncIntroInert).observe(el.intro, { attributes: true, attributeFilter: ['hidden'] });
+syncIntroInert();
 
 // ---------- Interface language ----------
 function pickLang() {
