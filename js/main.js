@@ -315,7 +315,7 @@ function setMark(v) {
 function updateReadout() {
   const s = state.scene;
   if (state.refStep < REF_STEPS) return; // the sound legend owns the marker for one bar
-  setMark(s === lightning ? clamp01(state.stats.coverage * 40) : state.stats.coverage > 0 ? state.stats.mean : null);
+  if (!state.playing) setMark(s === lightning ? clamp01(state.stats.coverage * 40) : state.stats.coverage > 0 ? state.stats.mean : null);
   if (s.readout) {
     const r = s.readout();
     if (r) { el.readoutLabel.textContent = r.label; el.readoutValue.textContent = r.value; }
@@ -365,7 +365,7 @@ function ensureLoop() {
         s.layers.slice(0, want).forEach((l) => state.layers.add(l.id));
         if (state.layers.size !== before) {
           const added = s.layers[want - 1].label;
-          Tone.getContext().draw.schedule(() => { renderLayers(); if (!state.touch) el.probeLive.textContent = `${added} joins.`; }, time);
+          Tone.getContext().draw.schedule(() => { renderLayers(); if (!state.touch && settings.autoAnnounce) el.probeLive.textContent = `${added} joins.`; }, time);
         }
       }
       s.onBar(state.stats, time, layerOn);
@@ -687,6 +687,7 @@ const RIPPLE_MS = 1400;
 state.ripples = [];
 state.noteTimes = [];
 function addRipple(x, y, str, col) {
+  if (!state.touch && col) setMark(col.mean); // the scale marker shows the pitch of the note just played
   const now = performance.now();
   if (col) logNote(col, str, now);
   state.ripples.push({ x, y: clamp01(y), str: clamp01(str), t0: now });

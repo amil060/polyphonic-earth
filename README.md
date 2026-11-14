@@ -41,6 +41,10 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 - **Musical, not noisy:** every note is snapped to a scale (pentatonic, Lydian, minor pentatonic), so the data stays listenable.
 
 ## Accessibility
+**What we tested ourselves:** keyboard-only use of every control; automated checks for contrast (lowest text 5.05:1 on the background, WCAG AA), accessible names, heading order, 24 px minimum targets and no horizontal scrolling from 320 px to 1920 px; mono output; the visual-only mode. **Not yet verified:** a full session with a screen-reader user and NVDA/VoiceOver on real devices. That is our next step, not a claim.
+
+**For deaf and hard-of-hearing visitors:** "Explore without sound" plays the map without audio. During playback the marker on the colour scale jumps to the pitch of each note, ripples show where each note comes from and how strong it is, and the oscilloscope under the map draws the rhythm of the notes.
+
 - Fully keyboard-operable: `1`–`4` scenes, `Space` play/pause, `T` Listen by Touch, arrow keys explore, `D` describe, `[` `]` years, `-` `=` volume, `H` help.
 - `aria-live` descriptions written for screen readers, a proper tab pattern, visible focus, 44 px touch targets.
 - Respects `prefers-reduced-motion`. Output passes through a limiter for hearing safety.
