@@ -21,6 +21,7 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 | 🌊 **Ocean** | ECCO2 sea surface currents & temperature | A west→east sweep melody: warm water sings high, cold water low, land is silent. The pad chord brightens as the ocean warms. Faster currents shimmer. |
 | 🌃 **Night Lights 2012→2023** | VIIRS Black Marble | City lights ring as bells, pitched by latitude. A **Time Machine** steps through the years, and a bass drone climbs as the world grows brighter. *Change* mode plays rising chimes where light grew and falling tones where it dimmed. |
 | ⚡ **Lightning** | ISS Lightning Imaging Sensor 2017–2023 | Every slice with flashes hits a drum. Tropical storms boom low, storms far from the equator sound higher. Rain noise swells with global storm activity. |
+| 🇦🇿 **Caspian & Mingachevir** | NASA POWER 1981–2024 + NASA GIBS MODIS | Our home region: one note per year of measured air temperature in Mingachevir over a low drone at the 1980s average. The melody climbs as the region warms (about +1.4 °C in the last decade vs the 1980s). |
 | 🏭 **CO₂** | DYAMOND GEOS carbon dioxide | A calm chord gains tritones and clashing seconds as CO₂ plumes intensify. The filter opens with concentration, and a gritty melody traces strong plumes. |
 
 ### How the music works
@@ -83,6 +84,8 @@ All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization 
 - Change in Night Lights between 2012 and 2023, EIC Version: https://svs.gsfc.nasa.gov/5313/
 - Lightning Events Detected from the ISS 2017–2023: https://svs.gsfc.nasa.gov/5011/
 - DYAMOND Global Carbon Dioxide: https://svs.gsfc.nasa.gov/5196/
+- NASA POWER (MERRA-2) yearly air temperature and rainfall for Mingachevir, and point climatology for Listen by Touch: https://power.larc.nasa.gov/
+- NASA GIBS, MODIS Terra corrected reflectance of the Caspian region (15 July 2023): https://gibs.earthdata.nasa.gov/
 - Inspiration: NASA "Data Sonification: Caldwell 73": https://svs.gsfc.nasa.gov/13786/
 
 **Software:** Tone.js (MIT). Fonts: Space Grotesk and Inter (Google Fonts, OFL).
