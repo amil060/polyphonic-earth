@@ -5,3 +5,4 @@ Thumbs.db
 
 # Local Claude Code settings and skills
 .claude/
+.taste-skill/
