@@ -345,10 +345,10 @@ function ensureLoop() {
       const k = state.refStep++;
       if (k === 0) {
         s.reference(0, time);
-        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`, { auto: true }); }, time);
       } else if (k === 4) {
         s.reference(1, time);
-        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`, { auto: true }); }, time);
       }
       return;
     }
@@ -374,7 +374,7 @@ function ensureLoop() {
         if (state.yearIndex >= YEARS.length - 1) { state.ending = true; Tone.getContext().draw.schedule(() => finishScene(), time); }
         else Tone.getContext().draw.schedule(() => showYear(state.yearIndex + 1), time);
       }
-      if (state.bar % 8 === 1) Tone.getContext().draw.schedule(() => describeNow(), time);
+      if (state.bar % 8 === 1) Tone.getContext().draw.schedule(() => describeNow(false), time);
     }
     const col = state.cols[state.step];
     const hit = col ? s.onStep(col, time, layerOn, engine) : 0;
@@ -548,12 +548,58 @@ function pause() {
 const togglePlay = () => (state.playing ? pause() : play());
 
 // ---------- Descriptions ----------
-function setLive(text) { el.live.textContent = text; }
-function describeNow() {
+// ---------- Listener settings (saved on this device) ----------
+const SETTINGS_KEY = 'pe-settings';
+const settings = { mono: false, autoAnnounce: true, speak: false, rate: 1 };
+try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch { /* storage blocked */ }
+const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ } };
+
+/** Read text aloud with the browser's own voice, for listeners without a screen reader. */
+function speak(text) {
+  if (!settings.speak || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = document.documentElement.lang || 'en';
+  u.rate = settings.rate;
+  speechSynthesis.speak(u);
+}
+
+/**
+ * Update the live description. Automatic updates (during playback) respect the
+ * "automatic descriptions" setting; descriptions the listener asks for always play.
+ */
+function setLive(text, { auto = false } = {}) {
+  el.live.textContent = text;
+  if (auto && !settings.autoAnnounce) { el.live.setAttribute('aria-live', 'off'); return; }
+  el.live.setAttribute('aria-live', 'polite');
+  speak(text);
+}
+function describeNow(manual = true) {
   const s = state.scene;
   if (!s || !state.cols.length) return;
-  setLive(s.describe(state.stats, state.cols, { year: YEARS[state.yearIndex] }));
+  setLive(s.describe(state.stats, state.cols, { year: YEARS[state.yearIndex] }), { auto: !manual });
 }
+
+function applySettings() {
+  $('set-mono').checked = settings.mono;
+  $('set-auto').checked = settings.autoAnnounce;
+  $('set-speak').checked = settings.speak;
+  $('set-rate').value = String(settings.rate);
+  $('set-rate-out').textContent = `${settings.rate.toFixed(1)}×`;
+  if (engine.started) engine.setMono(settings.mono);
+}
+$('settings-btn').addEventListener('click', () => { applySettings(); $('settings').showModal(); });
+$('settings').addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.id === 'set-mono') settings.mono = t.checked;
+  if (t.id === 'set-auto') settings.autoAnnounce = t.checked;
+  if (t.id === 'set-speak') { settings.speak = t.checked; if (!t.checked && 'speechSynthesis' in window) speechSynthesis.cancel(); }
+  saveSettings();
+  applySettings();
+  if (t.id === 'set-speak' && t.checked) speak('Spoken descriptions are on.');
+});
+$('set-rate').addEventListener('input', (e) => { settings.rate = Number(e.target.value); saveSettings(); applySettings(); });
+if (!('speechSynthesis' in window)) { $('set-speak').disabled = true; $('set-speak-note').textContent = 'Not available in this browser.'; }
 
 // ---------- Listen by Touch ----------
 function setTouch(on) {
@@ -711,6 +757,16 @@ function draw() {
 requestAnimationFrame(draw);
 
 // ---------- Controls ----------
+// Visual-only exploration: for deaf or hard-of-hearing visitors, silent rooms, or when audio
+// cannot start. The map plays, Listen by Touch shows values and NASA POWER measurements in text.
+$('visual-only').addEventListener('click', () => {
+  state.visualOnly = true;
+  el.intro.hidden = true;
+  if (state.scene?.media.type === 'video') el.video.play().catch(() => {});
+  setLive('Visual mode: no sound. Press T for Listen by Touch to read values and NASA measurements, or D for a description. Use the scale on the right to read colours.');
+  el.stage.focus({ preventScroll: true });
+});
+
 // "What is this?" reopens the start screen; once sound is running, its play button just closes it.
 $('about-btn').addEventListener('click', () => {
   el.intro.hidden = false;
@@ -733,7 +789,7 @@ el.start.addEventListener('click', async () => {
     await engine.start();
   } catch (err) {
     el.start.disabled = false;
-    $('intro-desc').textContent = 'Sound could not start on this device. Tap play again, or try another browser.';
+    $('intro-desc').textContent = 'Sound could not start on this device. Tap play again, or choose Explore without sound below.';
     console.error(err);
     return;
   }
@@ -744,6 +800,7 @@ el.start.addEventListener('click', async () => {
     if (Tone.getContext().state !== 'running') return;
   }
   engine.setVolume(Number(el.volume.value));
+  engine.setMono(settings.mono);
   el.intro.hidden = true;
   if (!state.scene) await selectScene(0);
   else state.scene.build(engine);
@@ -766,7 +823,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && engine.started) el.intro.hidden = true;
     return;
   }
-  if (el.help.open) return;
+  if (el.help.open || $("settings").open) return;
   const tag = e.target.tagName;
   const inField = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
   const k = e.key;

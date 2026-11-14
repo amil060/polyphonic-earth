@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=202611142047">
+  <link rel="stylesheet" href="css/style.css?v=202611142051">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -24,6 +24,7 @@
         <span class="cta-label">Listen to Earth</span>
       </button>
       <p id="intro-desc" class="intro-line">What if you could hear our planet changing?</p>
+      <button id="visual-only" class="btn btn-ghost" type="button">Explore without sound</button>
       <p class="intro-why">A jukebox that turns NASA's pictures of Earth into music, so anyone, including people who are blind, can explore our changing planet by ear.</p>
       <ol class="intro-steps" aria-label="How it works">
         <li><b>1 · NASA pictures</b><span>Real NASA animations: ocean temperature, city lights at night, lightning and CO₂.</span></li>
@@ -44,6 +45,7 @@
     </div>
     <div class="top-actions">
       <button id="about-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">What is this?</button>
+      <button id="settings-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">Listening settings</button>
       <button id="help-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog">
         Keyboard <kbd>H</kbd>
       </button>
@@ -225,6 +227,18 @@
     <p class="small muted">Built for the 2026 NASA Space Apps Challenge by team <strong>Open Guys AI</strong> (Mingachevir, Azerbaijan). Visualizations courtesy of NASA's Scientific Visualization Studio / Earth Information Center. Audio: <a href="https://tonejs.github.io/">Tone.js</a>.</p>
   </footer>
 
+  <dialog id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">Listening settings</h2>
+    <form method="dialog" class="settings-form">
+      <label class="set-row"><input id="set-mono" type="checkbox"><span><b>Mono audio</b><small>Both ears hear everything. For one-sided hearing or a single speaker. Positions are still announced in words.</small></span></label>
+      <label class="set-row"><input id="set-auto" type="checkbox"><span><b>Automatic descriptions</b><small>Describe the scene while it plays. Turn off to hear only the music; press <kbd>D</kbd> to ask for a description.</small></span></label>
+      <label class="set-row"><input id="set-speak" type="checkbox"><span><b>Speak descriptions aloud</b><small id="set-speak-note">Uses your browser's voice, for listeners without a screen reader.</small></span></label>
+      <label class="set-row set-range"><span><b>Speech rate</b><small>How fast descriptions are spoken.</small></span><input id="set-rate" type="range" min="0.6" max="1.8" step="0.1" value="1"><output id="set-rate-out">1.0×</output></label>
+      <p class="small muted">Layers (melody, harmony, bass, texture) can be switched on and off under the map. Settings are saved on this device.</p>
+      <button class="btn btn-primary">Done</button>
+    </form>
+  </dialog>
+
   <dialog id="help" aria-labelledby="help-title">
     <h2 id="help-title">Keyboard shortcuts</h2>
     <dl class="keys">
@@ -241,6 +255,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=202611142047"></script>
+  <script type="module" src="js/main.js?v=202611142051"></script>
 </body>
 </html>

@@ -120,6 +120,19 @@ export class Engine {
     this.started = true;
   }
 
+  /** Mono output for listeners with hearing in one ear or a single speaker. */
+  setMono(on) {
+    if (!this.limiter) return;
+    this.limiter.disconnect();
+    if (on) {
+      this.mono = this.mono || new Tone.Mono();
+      this.limiter.connect(this.mono);
+      this.mono.toDestination();
+    } else {
+      this.limiter.toDestination();
+    }
+  }
+
   setVolume(pct) {
     if (!this.master) return;
     // 0..100 → -60..0 dB, capped by the limiter for hearing safety
