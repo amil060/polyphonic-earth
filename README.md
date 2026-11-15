@@ -28,7 +28,7 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 - **Sound legend first.** Every scene opens by playing its lowest and its highest value once, like the axis of a chart, while a marker moves on the colour scale. Then the music starts.
 - **One layer at a time.** The melody plays alone, and harmony, bass and texture join every two bars. Each layer can be switched on or off.
 - **A slow sweep.** Eight west-to-east slices per bar, long ambient notes, and a soft knock for slices with no data (land, in the ocean scene).
-- **Microtonal maqam tuning.** Notes use quarter-tone maqam scales (Rast, Saba, Hijaz). The value picks a scale degree and the remainder bends the note by up to ±25 cents, so small differences in the data stay audible. In the CO₂ scene two copies of the chord drift apart in cents as concentration rises, and you hear them beat.
+- **Microtonal maqam tuning.** Notes use quarter-tone maqam scales (Rast and Hijaz). The value picks a scale degree and the remainder bends the note by up to ±25 cents, so small differences in the data stay audible. In the CO₂ scene two copies of the chord drift apart in cents as concentration rises, and you hear them beat.
 
 ### Does the sound tell the truth?
 We measured it. Every number below comes from the app's own data and code; nothing is estimated by ear.

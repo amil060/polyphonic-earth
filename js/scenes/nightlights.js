@@ -1,6 +1,6 @@
 // Night Lights 2012 → 2023 — VIIRS Black Marble (NASA SVS #5313)
 /* global Tone */
-import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115210003';
+import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115213218';
 
 // Map starts near 160°W, so x → longitude = -160 + x·360
 function regionOf(x) {
@@ -136,8 +136,8 @@ export const nightlights = {
         return 0.8;
       }
       if (col.mean < 0.45) {
-        fall.triggerAttackRelease(micro(0.4, MAQAM.saba, 48, 1), '4n', time, 0.7);
-        fall.setNote(micro(0.05, MAQAM.saba, 48, 1), time + 0.1);
+        fall.triggerAttackRelease(micro(0.4, MAQAM.hijaz, 48, 1), '4n', time, 0.7);
+        fall.setNote(micro(0.05, MAQAM.hijaz, 48, 1), time + 0.1);
         return 0.6;
       }
       return 0;

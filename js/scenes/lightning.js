@@ -1,6 +1,6 @@
 // Lightning — flashes detected by LIS on the International Space Station (NASA SVS #5011)
 /* global Tone */
-import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115210003';
+import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115213218';
 
 export const lightning = {
   id: 'lightning',
@@ -16,7 +16,7 @@ export const lightning = {
     text: 'NASA/Goddard Space Flight Center Scientific Visualization Studio: "Lightning Events Detected from the International Space Station (ISS) 2017–2023" (LIS data)',
     url: 'https://svs.gsfc.nasa.gov/5011/',
   },
-  scale: MAQAM.saba,
+  scale: MAQAM.hijaz,
   base: 33,
   bpm: 76,
   refLabels: ['a storm on the equator', 'a storm far from the equator'],

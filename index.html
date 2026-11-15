@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261115210003">
+  <link rel="stylesheet" href="css/style.css?v=20261115213218">
   <meta name="theme-color" content="#0b0d14">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Polyphonic Earth: hear NASA Earth data as music">
@@ -302,7 +302,7 @@
         <div class="panel-cols">
           <div>
             <h3>Recordings</h3>
-        <p class="small muted">Each scene rendered by the app as lossless FLAC, sound legend and layer intro included.</p>
+        <p class="small muted">Each scene, recorded from the app.</p>
         <ul class="recs">
           <li><span>Ocean</span><audio controls preload="none" src="assets/audio/ocean.flac"></audio><a href="assets/audio/ocean.flac" download>FLAC</a></li>
           <li><span>Night lights</span><audio controls preload="none" src="assets/audio/nightlights.flac"></audio><a href="assets/audio/nightlights.flac" download>FLAC</a></li>
@@ -316,7 +316,7 @@
         <p id="credit" class="small"></p>
             <details class="how">
           <summary>How the sonification works</summary>
-          <p class="small">Each frame of the NASA visualization is drawn into a hidden canvas and analysed pixel by pixel (192 × 96 grid). The pixel colours are converted back into data values using the visualization's own colour scale. Before the music starts, a sound legend plays the lowest and the highest value once, like the axis of a chart. A slow sweep then moves from west to east once per bar. Each of the 8 slices of the map becomes a note: its value sets the pitch, how much of it contains data sets the loudness, and its position sets the stereo pan. The layers enter one at a time, and you can switch each one on or off. Notes use quarter-tone maqam scales (Rast, Saba, Hijaz): the value picks a scale degree and what is left over bends the note by up to 25 cents, so small differences in the data stay audible. In the CO₂ scene the chord's two voices drift apart in cents as concentration rises, and you hear them beat. A soft knock marks a slice with no data, for example land in the ocean scene.</p>
+          <p class="small">The app reads the colours of each NASA frame and turns them back into data. A sweep plays the map from west to east: the value sets the pitch and the position sets left or right. Notes use quarter-tone maqam scales (Rast and Hijaz), so even small differences in the data stay audible.</p>
         </details>
           </div>
         </div>
@@ -327,16 +327,9 @@
       <div><h3>The problem</h3><p>NASA's Earth Information Center shows how our planet is changing through beautiful visualizations, but only to people who can see them. More than 2.2 billion people live with a vision impairment (WHO), and many more learn better by listening.</p></div>
       <div><h3>Our answer</h3><p>Polyphonic Earth reads every frame of NASA visualizations and NASA POWER data and plays them as music in real time. Pitch, loudness, rhythm and stereo carry the data; descriptions, Listen by Touch and a visual mode make it usable with or without sight or hearing.</p></div>
       <div><h3>Why accessibility</h3><p>Climate data belongs to everyone. Designing for blind and deaf visitors first gave us features that help every listener: a sound legend before the music, layers that enter one at a time, and plain explanations of what each sound means.</p></div>
-      <div><h3>Team</h3><p>Open Guys AI, NASA Space Apps Challenge 2026, Mingachevir, Azerbaijan. The start-screen theme song is an original composition by our teammate Ali Aliyev. Built with open NASA data, Tone.js and an AI coding assistant; the concept, data choices, sound design decisions and testing are ours.</p></div>
+      <div><h3>Team</h3><p>Open Guys AI from Mingachevir, Azerbaijan. The theme song on the start screen is by our teammate Ali Aliyev.</p></div>
         </div>
-        <h3 class="next-title">What's next</h3>
-        <ol class="next-list">
-          <li><b>Test with blind and low-vision listeners</b><span>in Azerbaijan, then change what does not work for them. So far we have tested with keyboards and automated checks, not yet with a screen-reader user.</span></li>
-          <li><b>A museum mode</b><span>for science centres and planetariums: headphones, one big button, and the 60-second tour on a loop.</span></li>
-          <li><b>More NASA data</b><span>such as sea ice, vegetation and sea level, each with its own instrument.</span></li>
-          <li><b>An offline version</b><span>for classrooms without fast internet.</span></li>
-        </ol>
-        <p class="about-links small"><a href="https://github.com/amil060/polyphonic-earth">Source code on GitHub</a> · <a href="https://github.com/amil060/polyphonic-earth#does-the-sound-tell-the-truth">How we measured the proof</a></p>
+        <p class="about-links small"><a href="https://github.com/amil060/polyphonic-earth">Source code on GitHub</a></p>
       </div>
     </section>
   </main>
@@ -376,6 +369,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261115210003"></script>
+  <script type="module" src="js/main.js?v=20261115213218"></script>
 </body>
 </html>

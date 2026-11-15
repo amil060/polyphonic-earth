@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115210003';
-import { Engine, clamp01 } from './engine.js?v=20261115210003';
-import { ocean } from './scenes/ocean.js?v=20261115210003';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115210003';
-import { lightning } from './scenes/lightning.js?v=20261115210003';
-import { co2 } from './scenes/co2.js?v=20261115210003';
-import { caspian } from './scenes/caspian.js?v=20261115210003';
-import { climateAt } from './power.js?v=20261115210003';
-import { icon } from './icons.js?v=20261115210003';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115210003';
+import { Analyzer } from './analyzer.js?v=20261115213218';
+import { Engine, clamp01 } from './engine.js?v=20261115213218';
+import { ocean } from './scenes/ocean.js?v=20261115213218';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115213218';
+import { lightning } from './scenes/lightning.js?v=20261115213218';
+import { co2 } from './scenes/co2.js?v=20261115213218';
+import { caspian } from './scenes/caspian.js?v=20261115213218';
+import { climateAt } from './power.js?v=20261115213218';
+import { icon } from './icons.js?v=20261115213218';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115213218';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -443,6 +443,8 @@ function play() {
   hideSummary();
   if (state.finished) restartScene(); // Play after the end starts the scene again from the beginning
   if (state.needsIntro && guideWanted(state.scene)) { openGuide(state.scene); return; }
+  // With spoken descriptions, the sound legend is never played under speech: each sentence first, then its note.
+  if (settings.speak && state.needsIntro && !tour.on && !state.skipLegend) { spokenLegendThenPlay(state.scene); return; }
   applyTempo();
   if (state.needsIntro) {
     startIntro();
@@ -1243,21 +1245,7 @@ async function runGuideSpeech(s) {
   if (!alive()) return;
   await speak(guideRules(s).join('. ') + '.', { lang: ui, interrupt: false });
   if (!alive()) return;
-  await speak(`This is the lowest note: ${s.refLabels[0]}.`, { interrupt: false });
-  await untilQuiet();
-  if (!alive()) return;
-  playRef(s, 0);
-  await wait(2000);
-  if (!alive()) return;
-  await speak(`This is the highest note: ${s.refLabels[1]}.`, { interrupt: false });
-  await untilQuiet();
-  if (!alive()) return;
-  playRef(s, 1);
-  await wait(2000);
-  if (!alive()) return;
-  await speak('Now the map plays, from west to east.', { interrupt: false });
-  await untilQuiet();
-  if (!alive()) return;
+  if (!(await spokenLegend(s, run))) return;
   startFromGuide(true);
 }
 function startFromGuide(legendDone) {
@@ -1346,3 +1334,40 @@ $('visual-only').addEventListener('click', () => {
 const openSettings = () => { applySettings(); $('settings').showModal(); };
 $('a11y-btn').addEventListener('click', openSettings);
 $('intro-a11y').addEventListener('click', openSettings);
+
+
+// ---------- Spoken sound legend: sentence, silence, note; then the music ----------
+// Used by the guide and by every first play of a scene while spoken descriptions are on, so a
+// reference note never sounds under a sentence. Returns false if the listener moved on.
+async function spokenLegend(s, run) {
+  const alive = () => run === guideRun && state.scene === s;
+  await speak(`This is the lowest note: ${s.refLabels[0]}.`, { interrupt: false });
+  await untilQuiet();
+  if (!alive()) return false;
+  playRef(s, 0);
+  await wait(2000);
+  if (!alive()) return false;
+  await speak(`This is the highest note: ${s.refLabels[1]}.`, { interrupt: false });
+  await untilQuiet();
+  if (!alive()) return false;
+  playRef(s, 1);
+  await wait(2000);
+  if (!alive()) return false;
+  await speak('Now the map plays, from west to east.', { interrupt: false });
+  await untilQuiet();
+  return alive();
+}
+async function spokenLegendThenPlay(s) {
+  const run = ++guideRun;
+  hideSummary();
+  if (!s.nodes) s.build(engine);
+  if (!state.fromGuide) { // the guide already said who the scene is
+    await speak(t('nar.' + s.id), { lang: getLang() });
+    await untilQuiet();
+  } else speechSynthesis.cancel();
+  if (!(await spokenLegend(s, run))) return;
+  hideCallout();
+  state.skipLegend = true;
+  state.fromGuide = true;
+  play();
+}
