@@ -43,7 +43,7 @@ We measured it. Every number below comes from the app's own data and code; nothi
 Limits: ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). Mingachevir values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.
 
 ### Recordings
-Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac).
+Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac) · [Azerbaijan](assets/audio/azerbaijan.flac).
 
 ### Theme song
 The start screen has an optional theme song, **"Polyphonic Earth"**, an original composition by our teammate **Ali Aliyev** ([theme.m4a](assets/audio/theme.m4a), 48 s). It plays only when you press its button and fades out as soon as you enter the map, so it never plays over the data.

@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115200522';
-import { Engine, clamp01 } from './engine.js?v=20261115200522';
-import { ocean } from './scenes/ocean.js?v=20261115200522';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115200522';
-import { lightning } from './scenes/lightning.js?v=20261115200522';
-import { co2 } from './scenes/co2.js?v=20261115200522';
-import { caspian } from './scenes/caspian.js?v=20261115200522';
-import { climateAt } from './power.js?v=20261115200522';
-import { icon } from './icons.js?v=20261115200522';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115200522';
+import { Analyzer } from './analyzer.js?v=20261115210003';
+import { Engine, clamp01 } from './engine.js?v=20261115210003';
+import { ocean } from './scenes/ocean.js?v=20261115210003';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115210003';
+import { lightning } from './scenes/lightning.js?v=20261115210003';
+import { co2 } from './scenes/co2.js?v=20261115210003';
+import { caspian } from './scenes/caspian.js?v=20261115210003';
+import { climateAt } from './power.js?v=20261115210003';
+import { icon } from './icons.js?v=20261115210003';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115210003';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear

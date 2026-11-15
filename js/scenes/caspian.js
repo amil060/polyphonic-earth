@@ -3,7 +3,7 @@
 // left-to-right movement is real geography: Nakhchivan sounds on the left, Baku on the right. A note's
 // pitch is how much warmer that city's decade was than its own 1981–1990 average.
 /* global Tone */
-import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115200522';
+import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115210003';
 
 const BOX = { lonW: 43, lonE: 55, latN: 48, latS: 36 }; // the satellite image bounds
 const toX = (lon) => (lon - BOX.lonW) / (BOX.lonE - BOX.lonW);
@@ -99,7 +99,8 @@ export const caspian = {
   current() {
     const d = this.data;
     if (!d) return null;
-    const dec = this.decadeAt(this.idx);
+    // After the last city the index wraps to 0: keep showing the decade that was just played.
+    const dec = this.idx === 0 && this.lastDec != null ? this.lastDec : this.decadeAt(this.idx);
     return { decade: DECADES[dec].label, anomaly: d.national[dec] };
   },
 
@@ -153,7 +154,9 @@ export const caspian = {
     if (!d) return 0;
     const i = this.idx;
     const dec = this.decadeAt(i), k = i % N_CITIES;
+    this.lastDec = i === 0 ? null : dec;
     this.idx = (i + 1) % (DECADES.length * N_CITIES);
+    if (this.idx === 0) this.lastDec = dec;
     const c = d.cities[k];
     const v = this.norm(c.anom[dec]);
     this.nodes.pan.pan.rampTo((c.x - 0.2) / 0.37 * 1.6 - 0.8, 0.08, time); // west = left ear, east = right ear
