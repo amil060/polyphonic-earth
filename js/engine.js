@@ -138,7 +138,7 @@ export class Engine {
   /** Lower the music under speech (on) or bring it back (off). */
   duck(on) {
     if (!this.duckNode) return;
-    this.duckNode.gain.rampTo(on ? 0.28 : 1, on ? 0.15 : 0.6);
+    this.duckNode.gain.rampTo(on ? 0.5 : 1, on ? 0.25 : 0.8); // about -6 dB: the music stays present under speech
   }
 
   setVolume(pct) {

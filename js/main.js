@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115213428';
-import { Engine, clamp01 } from './engine.js?v=20261115213428';
-import { ocean } from './scenes/ocean.js?v=20261115213428';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115213428';
-import { lightning } from './scenes/lightning.js?v=20261115213428';
-import { co2 } from './scenes/co2.js?v=20261115213428';
-import { caspian } from './scenes/caspian.js?v=20261115213428';
-import { climateAt } from './power.js?v=20261115213428';
-import { icon } from './icons.js?v=20261115213428';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115213428';
+import { Analyzer } from './analyzer.js?v=20261115215256';
+import { Engine, clamp01 } from './engine.js?v=20261115215256';
+import { ocean } from './scenes/ocean.js?v=20261115215256';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115215256';
+import { lightning } from './scenes/lightning.js?v=20261115215256';
+import { co2 } from './scenes/co2.js?v=20261115215256';
+import { caspian } from './scenes/caspian.js?v=20261115215256';
+import { climateAt } from './power.js?v=20261115215256';
+import { icon } from './icons.js?v=20261115215256';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115215256';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -347,10 +347,10 @@ function ensureLoop() {
       const k = state.refStep++;
       if (k === 0) {
         s.reference(0, time);
-        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); caption(`♪ ${t('lowest')} · ${s.refLabels[0]}`); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`, { auto: true }); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`, { auto: true }); }, time);
       } else if (k === 4) {
         s.reference(1, time);
-        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); caption(`♪ ${t('highest')} · ${s.refLabels[1]}`); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`, { auto: true }); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`, { auto: true }); }, time);
       }
       return;
     }
@@ -359,7 +359,7 @@ function ensureLoop() {
     if (state.step === 0) {
       state.bar++;
       if (state.bar === 1) Tone.getContext().draw.schedule(() => showCallout('go'), time);
-      if (state.bar === 3) Tone.getContext().draw.schedule(hideCallout, time);
+      if (state.bar === 2) Tone.getContext().draw.schedule(hideCallout, time);
       // Layers enter one at a time: melody alone, then harmony, bass and texture every two bars.
       if (!state.layerManual) {
         const want = Math.min(s.layers.length, tour.on ? state.bar : 1 + Math.floor((state.bar - 1) / 2));
@@ -1146,11 +1146,13 @@ function narrate(s) {
   const line = t('nar.' + s.id);
   const box = $('narrator');
   if (!line || line === 'nar.' + s.id || !box) return;
-  box.textContent = line;
-  box.hidden = false;
-  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
-  clearTimeout(narrTimer);
-  narrTimer = setTimeout(() => { box.hidden = true; }, 6500);
+  if (tour.on) {
+    box.textContent = line;
+    box.hidden = false;
+    box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+    clearTimeout(narrTimer);
+    narrTimer = setTimeout(() => { box.hidden = true; }, 6500);
+  }
   el.probeLive.textContent = line;
   speak(line, { lang: getLang() });
 }
@@ -1208,16 +1210,25 @@ function guideRules(s) { return t('listen.' + s.id).split(' · '); }
 function hideGuide() {
   guideRun++;
   $('guide').hidden = true;
+  $('guide-low').classList.remove('is-on');
+  $('guide-high').classList.remove('is-on');
 }
-function playRef(s, v) {
+// A reference note is shown when its sentence starts (scale marker, plus the callout or, while the guide
+// card is open, its button lights up) and sounds when the sentence has ended.
+function showRef(s, v) {
+  setMark(v);
+  const guideOpen = !$('guide').hidden;
+  $('guide-low').classList.toggle('is-on', guideOpen && v === 0);
+  $('guide-high').classList.toggle('is-on', guideOpen && v === 1);
+  if (guideOpen) hideCallout(); else showCallout(v ? 'high' : 'low');
+}
+function soundRef(s, v) {
   if (!engine.started) return;
   if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!s.nodes) s.build(engine);
   s.reference(v, Tone.now() + 0.05);
-  setMark(v);
-  showCallout(v ? 'high' : 'low');
-  caption(`♪ ${v ? t('highest') : t('lowest')} · ${s.refLabels[v]}`);
 }
+function playRef(s, v) { showRef(s, v); soundRef(s, v); }
 function openGuide(s) {
   state.guided.add(s.id);
   if (!s.nodes) s.build(engine);
@@ -1242,8 +1253,7 @@ async function runGuideSpeech(s) {
   const alive = () => run === guideRun && !$('guide').hidden;
   const ui = getLang();
   await speak(t('nar.' + s.id), { lang: ui });
-  if (!alive()) return;
-  await speak(guideRules(s).join('. ') + '.', { lang: ui, interrupt: false });
+  await untilQuiet();
   if (!alive()) return;
   if (!(await spokenLegend(s, run))) return;
   startFromGuide(true);
@@ -1260,9 +1270,10 @@ async function guideTone(v) {
   guideRun++; // the listener took over: stop the automatic sequence
   const s = state.scene;
   const label = `${v ? 'Highest' : 'Lowest'} note: ${s.refLabels[v]}.`;
-  if (settings.speak) await speak(label);
+  showRef(s, v);
+  if (settings.speak) { await speak(label); await untilQuiet(); }
   else el.probeLive.textContent = label;
-  playRef(s, v);
+  soundRef(s, v);
 }
 $('guide-low').addEventListener('click', () => guideTone(0));
 $('guide-high').addEventListener('click', () => guideTone(1));
@@ -1341,17 +1352,19 @@ $('intro-a11y').addEventListener('click', openSettings);
 // reference note never sounds under a sentence. Returns false if the listener moved on.
 async function spokenLegend(s, run) {
   const alive = () => run === guideRun && state.scene === s;
+  showRef(s, 0);
   await speak(`This is the lowest note: ${s.refLabels[0]}.`, { interrupt: false });
   await untilQuiet();
   if (!alive()) return false;
-  playRef(s, 0);
-  await wait(2000);
+  soundRef(s, 0);
+  await wait(1800);
   if (!alive()) return false;
+  showRef(s, 1);
   await speak(`This is the highest note: ${s.refLabels[1]}.`, { interrupt: false });
   await untilQuiet();
   if (!alive()) return false;
-  playRef(s, 1);
-  await wait(2000);
+  soundRef(s, 1);
+  await wait(1800);
   if (!alive()) return false;
   await speak('Now the map plays, from west to east.', { interrupt: false });
   await untilQuiet();
