@@ -143,8 +143,10 @@ export class Engine {
 
   setVolume(pct) {
     if (!this.master) return;
-    // 0..100 → -60..0 dB, capped by the limiter for hearing safety
-    this.master.volume.rampTo(pct <= 0 ? -Infinity : -40 + pct * 0.36, 0.1);
+    // Calibrated by measurement (2026-11-15): at 70 % the scenes reach about -18 LUFS, close to the
+    // -16 LUFS recordings; at 100 % about -15 LUFS. Logarithmic, so the slider feels even.
+    // The limiter (-3 dB) still caps every peak for hearing safety.
+    this.master.volume.rampTo(pct <= 0 ? -Infinity : 18 + 28 * Math.log10(pct / 100), 0.1);
   }
 
   /** Soft wooden knock that marks a silent (no-data) slice of the sweep. */

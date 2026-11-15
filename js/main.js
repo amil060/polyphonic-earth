@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115192303';
-import { Engine, clamp01 } from './engine.js?v=20261115192303';
-import { ocean } from './scenes/ocean.js?v=20261115192303';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115192303';
-import { lightning } from './scenes/lightning.js?v=20261115192303';
-import { co2 } from './scenes/co2.js?v=20261115192303';
-import { caspian } from './scenes/caspian.js?v=20261115192303';
-import { climateAt } from './power.js?v=20261115192303';
-import { icon } from './icons.js?v=20261115192303';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115192303';
+import { Analyzer } from './analyzer.js?v=20261115195842';
+import { Engine, clamp01 } from './engine.js?v=20261115195842';
+import { ocean } from './scenes/ocean.js?v=20261115195842';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115195842';
+import { lightning } from './scenes/lightning.js?v=20261115195842';
+import { co2 } from './scenes/co2.js?v=20261115195842';
+import { caspian } from './scenes/caspian.js?v=20261115195842';
+import { climateAt } from './power.js?v=20261115195842';
+import { icon } from './icons.js?v=20261115195842';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115195842';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -436,6 +436,7 @@ function play() {
   }
   if (!engine.started || !state.scene) return;
   if (!$('guide').hidden) hideGuide();
+  document.querySelectorAll('.recs audio').forEach((a) => a.pause()); // one sound source at a time
   // Phones suspend audio when the screen locks or the tab is hidden; a tap on Play wakes it.
   if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!state.scene.nodes) state.scene.build(engine);
@@ -1303,3 +1304,10 @@ function applyTempo() {
   el.video.playbackRate = k;
 }
 if (!canVibrate) { $('set-vibrate').disabled = true; $('set-vibrate-note').textContent = 'Not available in this browser. Vibration works in Chrome on Android phones.'; }
+
+// Recordings: only one plays at a time, and the live map pauses while one plays.
+document.querySelectorAll('.recs audio').forEach((a) => a.addEventListener('play', () => {
+  document.querySelectorAll('.recs audio').forEach((b) => { if (b !== a) b.pause(); });
+  if (!theme.audio.paused) stopTheme(300);
+  if (state.playing) pause();
+}));

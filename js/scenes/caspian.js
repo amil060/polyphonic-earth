@@ -1,7 +1,7 @@
 // Caspian & Mingachevir — 44 years of warming at home (NASA POWER + NASA GIBS MODIS imagery)
 /* global Tone */
-import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115192303';
-import { yearlySeries } from '../power.js?v=20261115192303';
+import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115195842';
+import { yearlySeries } from '../power.js?v=20261115195842';
 
 const LAT = 40.76, LON = 47.05;              // Mingachevir, Azerbaijan
 const BOX = { lonW: 43, lonE: 55, latN: 48, latS: 36 }; // the satellite image bounds
