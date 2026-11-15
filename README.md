@@ -21,7 +21,7 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 | 🌊 **Ocean** | ECCO2 sea surface currents & temperature | A west→east sweep melody: warm water sings high, cold water low, land is silent. The pad chord brightens as the ocean warms. Faster currents shimmer. |
 | 🌃 **Night Lights 2012→2023** | VIIRS Black Marble | City lights ring as bells, pitched by latitude. A **Time Machine** steps through the years, and a bass drone climbs as the world grows brighter. *Change* mode plays rising chimes where light grew and falling tones where it dimmed. |
 | ⚡ **Lightning** | ISS Lightning Imaging Sensor 2017–2023 | Every slice with flashes hits a drum. Tropical storms boom low, storms far from the equator sound higher. Rain noise swells with global storm activity. |
-| 🇦🇿 **Caspian & Mingachevir** | NASA POWER 1981–2024 + NASA GIBS MODIS | Our home region: one note per year of measured air temperature in Mingachevir over a low drone at the 1980s average. The melody climbs as the region warms (about +1.4 °C in the last decade vs the 1980s). |
+| 🇦🇿 **Azerbaijan, west to east** | NASA POWER 1981–2024 for eight cities + NASA GIBS MODIS | Our home country: the sweep plays eight cities from Nakhchivan (left ear) to Baku (right ear), so the left-to-right movement is real geography. Each bar is one decade, and a higher note means that city was warmer than in its own 1980s. In 2015–2024 every city was warmer than in 1981–1990, by about 1.1 to 1.5 °C. |
 | 🏭 **CO₂** | DYAMOND GEOS carbon dioxide | A calm chord gains tritones and clashing seconds as CO₂ plumes intensify. The filter opens with concentration, and a gritty melody traces strong plumes. |
 
 ### How the music works
@@ -43,13 +43,13 @@ We measured it. Every number below comes from the app's own data and code; nothi
 Limits: ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). Mingachevir values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.
 
 ### Recordings
-Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac) · [Caspian & Mingachevir](assets/audio/caspian.flac).
+Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac).
 
 ### Theme song
 The start screen has an optional theme song, **"Polyphonic Earth"**, an original composition by our teammate **Ali Aliyev** ([theme.m4a](assets/audio/theme.m4a), 48 s). It plays only when you press its button and fades out as soon as you enter the map, so it never plays over the data.
 
 ### Signature features
-- **60-second tour:** one button plays all five scenes for about ten seconds each and ends with the full Mingachevir scene and its summary. Escape, Pause or Stop tour hand control back to you.
+- **60-second tour:** one button plays all five scenes for about ten seconds each and ends with the full Azerbaijan scene and its summary. Escape, Pause or Stop tour hand control back to you.
 - **Each scene introduces itself:** a one-line, first-person narrator ("I am the ocean…") appears over the map in the interface language, goes to screen readers, and is spoken aloud when spoken descriptions are on.
 - **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value. Pause for a moment and the app sends a **live request to the NASA POWER API** for that point and reads out its 1981–2020 average air temperature and rainfall; a red LIVE badge marks the answer.
 - **Stereo map:** in every scene, west sounds on the left and east on the right.
@@ -109,9 +109,9 @@ All visualizations: **NASA/Goddard Space Flight Center Scientific Visualization 
 - Lightning Events Detected from the ISS 2017–2023 (EIC display): https://svs.gsfc.nasa.gov/5011/
 - DYAMOND Global Carbon Dioxide (EIC display): https://svs.gsfc.nasa.gov/5196/
 - Global Sea Surface Currents and Temperature (ECCO2, NASA SVS): https://svs.gsfc.nasa.gov/3912/
-- NASA POWER (MERRA-2) yearly air temperature and rainfall for Mingachevir, and point climatology for Listen by Touch: https://power.larc.nasa.gov/
+- NASA POWER (MERRA-2) yearly air temperature and rainfall for eight Azerbaijani cities (Nakhchivan, Ganja, Mingachevir, Gabala, Shamakhi, Lankaran, Sumgait, Baku; Shaki left out because it shares a grid cell with Mingachevir), and point climatology for Listen by Touch: https://power.larc.nasa.gov/
 - NASA GIBS, MODIS Terra corrected reflectance of the Caspian region (15 July 2023): https://gibs.earthdata.nasa.gov/
-- Caspian sea-level context in the Caspian summary: Chen, J. L. et al. (2017), Long-term Caspian Sea level change, *Geophysical Research Letters*, doi:10.1002/2017GL073958
+- Caspian sea-level context in the Azerbaijan summary: Chen, J. L. et al. (2017), Long-term Caspian Sea level change, *Geophysical Research Letters*, doi:10.1002/2017GL073958
 - Inspiration: NASA "Data Sonification: Caldwell 73": https://svs.gsfc.nasa.gov/13786/
 
 **Music:** start-screen theme "Polyphonic Earth" © 2026 Ali Aliyev, used with permission.
