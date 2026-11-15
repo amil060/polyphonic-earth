@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115213218';
-import { Engine, clamp01 } from './engine.js?v=20261115213218';
-import { ocean } from './scenes/ocean.js?v=20261115213218';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115213218';
-import { lightning } from './scenes/lightning.js?v=20261115213218';
-import { co2 } from './scenes/co2.js?v=20261115213218';
-import { caspian } from './scenes/caspian.js?v=20261115213218';
-import { climateAt } from './power.js?v=20261115213218';
-import { icon } from './icons.js?v=20261115213218';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115213218';
+import { Analyzer } from './analyzer.js?v=20261115213428';
+import { Engine, clamp01 } from './engine.js?v=20261115213428';
+import { ocean } from './scenes/ocean.js?v=20261115213428';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115213428';
+import { lightning } from './scenes/lightning.js?v=20261115213428';
+import { co2 } from './scenes/co2.js?v=20261115213428';
+import { caspian } from './scenes/caspian.js?v=20261115213428';
+import { climateAt } from './power.js?v=20261115213428';
+import { icon } from './icons.js?v=20261115213428';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115213428';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -467,7 +467,7 @@ function play() {
 
 // ---------- End of a scene ----------
 // Each scene plays once: the NASA video to its end, Night Lights through every year to Change,
-// the Caspian series from 1981 to 2024. Then it stops; Play starts it again from the beginning.
+// the Azerbaijan scene through all five decades. Then it stops; Play starts it again from the beginning.
 function finishScene() {
   if (!state.playing || state.finished) return;
   pause();
@@ -1155,8 +1155,8 @@ function narrate(s) {
   speak(line, { lang: getLang() });
 }
 
-// ---------- 60-second tour: every scene for about ten seconds, ending on Mingachevir ----------
-// The last scene (Caspian) plays its 44 years to the end and shows its summary; the tour ends there.
+// ---------- 60-second tour: every scene for about ten seconds, ending on Azerbaijan ----------
+// The last scene (Azerbaijan) plays all five decades to the end and shows its summary; the tour ends there.
 // Pause, Escape, a scene key or Stop tour hand control back to the listener.
 const TOUR_SECONDS = 9;
 function renderTour() {
