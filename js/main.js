@@ -181,7 +181,7 @@ async function selectScene(i) {
   state.layers = new Set();
   renderLayers();
   el.frame.style.setProperty('--ar', s === ocean || s === lightning ? '2' : s === caspian ? '1' : String(16 / 9));
-  $('measured').textContent = '';
+  $('measured').textContent = ''; $('measured').classList.remove('is-live');
   if (s.media.type === 'video') {
     el.still.hidden = true; el.video.hidden = false;
     el.video.src = s.media.src;
@@ -630,15 +630,18 @@ let measureTimer = 0;
 function measureHere(s, fx, fy) {
   clearTimeout(measureTimer);
   const g = latLon(s, fx, fy);
-  if (!g) { $('measured').textContent = ''; return; }
+  const m = $('measured');
+  if (!g) { m.textContent = ''; m.classList.remove('is-live'); return; }
   measureTimer = setTimeout(async () => {
-    $('measured').textContent = 'NASA POWER: loading…';
+    m.classList.remove('is-live');
+    m.textContent = 'NASA POWER API: loading…';
     const c = await climateAt(g.lat, g.lon);
     if (state.scene !== s || !state.touch) return;
-    if (!c) { $('measured').textContent = 'NASA POWER unavailable offline'; return; }
+    if (!c) { m.textContent = 'NASA POWER unavailable offline'; return; }
     const msg = `${c.t2m.toFixed(1)} °C air, ${c.precip.toFixed(1)} mm rain/day`;
-    $('measured').textContent = `NASA POWER: ${msg}`;
-    el.probeLive.textContent = `Measured by NASA POWER near ${fmtLatLon(c)}: average ${msg} (1981–2020).`;
+    m.textContent = `NASA POWER API · 1981–2020 average: ${msg}`;
+    m.classList.add('is-live');
+    el.probeLive.textContent = `Live request to the NASA POWER API, near ${fmtLatLon(c)}: average ${msg} (1981–2020).`;
     if (s.series) engine.playProbe(clamp01((c.t2m + 5) / 35), fx, s); // sound the measured temperature
   }, 450);
 }
@@ -1008,3 +1011,28 @@ document.querySelectorAll('.intro-langs [data-lang]').forEach((b) => b.addEventL
 // Show the first scene moving behind the start gate so the first screen is never empty.
 selectScene(0).then(() => el.video.play().catch(() => {}));
 el.start.focus();
+
+// Tabs below the map (This scene · Proof · Recordings & data · About): click, arrow keys, Home and End.
+{
+  const tabs = [...document.querySelectorAll('.info-tabs [role="tab"]')];
+  const select = (tab, focus) => {
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t, false));
+    t.addEventListener('keydown', (e) => {
+      const n = tabs.length;
+      const to = { ArrowRight: (i + 1) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      e.stopPropagation();
+      select(tabs[to], true);
+    });
+  });
+}

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261115181453">
+  <link rel="stylesheet" href="css/style.css?v=20261115182213">
   <meta name="theme-color" content="#0b0d14">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Polyphonic Earth: hear NASA Earth data as music">
@@ -185,7 +185,7 @@
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
               <span data-i18n="describe">Describe</span> <kbd>D</kbd>
             </button>
-            <div id="layers" class="layers" role="group" aria-label="Sound layers: switch each one on or off"></div>
+            <details class="layers-pop"><summary class="chip">Layers</summary><div id="layers" class="layers" role="group" aria-label="Sound layers: switch each one on or off"></div></details>
             <label class="vol">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6"/></svg>
               <span class="sr-only">Volume</span>
@@ -201,10 +201,23 @@
       <svg id="waves" viewBox="0 0 1440 120" preserveAspectRatio="none"></svg>
     </div>
 
-    <!-- Below the map: explanation, live description, data source -->
-    <section class="info" aria-label="What am I hearing?">
-      <div class="info-main">
-        <section class="science" aria-labelledby="sci-title">
+    <!-- Below the map: live description, then tabs (this scene, proof, recordings and data, about) -->
+    <section class="info" aria-label="Scene details">
+      <div class="info-live">
+        <h2 class="sr-only">Live description</h2>
+        <p id="live" class="live" aria-live="polite" aria-atomic="true">Press Play to begin.</p>
+        <p id="probe-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+      </div>
+      <div class="info-tabs" role="tablist" aria-label="More about this project">
+        <button type="button" role="tab" id="tab-scene" aria-controls="panel-scene" aria-selected="true" tabindex="0">This scene</button>
+        <button type="button" role="tab" id="tab-proof" aria-controls="panel-proof" aria-selected="false" tabindex="-1">Proof</button>
+        <button type="button" role="tab" id="tab-rec" aria-controls="panel-rec" aria-selected="false" tabindex="-1">Recordings &amp; data</button>
+        <button type="button" role="tab" id="tab-about" aria-controls="panel-about" aria-selected="false" tabindex="-1">About</button>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="panel-scene" aria-labelledby="tab-scene" tabindex="0">
+        <div class="panel-cols">
+          <div>
+            <section class="science" aria-labelledby="sci-title">
           <h2 id="sci-title" data-i18n="read">How to read this scene</h2>
           <ol class="flow">
             <li><b data-i18n="data">NASA data</b><span id="sci-data"></span></li>
@@ -213,26 +226,53 @@
           </ol>
           <p class="limits"><b data-i18n="limits">Limits</b> <span id="sci-limits"></span></p>
         </section>
-        <h2 data-i18n="hear">What am I hearing?</h2>
-        <ul id="legend" class="legend"></ul>
-      </div>
-      <div class="info-side">
-        <h3>Live description</h3>
-        <p id="live" class="live" aria-live="polite" aria-atomic="true">Press Play to begin.</p>
-        <p id="probe-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
-
-        <h3>Sonification log</h3>
+            <h2 data-i18n="hear">What am I hearing?</h2>
+            <ul id="legend" class="legend"></ul>
+          </div>
+          <div>
+            <h3>Sonification log</h3>
         <ol id="log" class="log" role="log" aria-live="off" aria-label="Most recent notes and the data behind them">
           <li class="log-empty">Notes appear here as the sweep plays them.</li>
         </ol>
-
-        <figure id="spark-wrap" class="spark" hidden>
+            <figure id="spark-wrap" class="spark" hidden>
           <figcaption class="small muted">Total detected night light per year, measured from the NASA frames by this app</figcaption>
           <svg id="sparkline" viewBox="0 0 300 70" role="img" aria-label="Chart of total detected night light from 2012 to 2023"></svg>
           <p id="tm-help" class="muted small">Use <kbd>[</kbd> and <kbd>]</kbd> to step years. The last stop, "Change", plays what grew brighter (purple) and darker (orange) between 2012 and 2023.</p>
         </figure>
-
-        <h3>Recordings</h3>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="panel-proof" aria-labelledby="tab-proof" tabindex="0" hidden>
+          <h2 id="proof-title">Does the sound tell the truth?</h2>
+          <p class="proof-intro">We measured it. Every number comes from the app's own data and code, not from listening by ear.</p>
+          <div class="proof-grid">
+            <article class="proof-card proof-hero">
+              <p class="proof-kicker">Mingachevir, Azerbaijan · NASA POWER 1981–2024</p>
+              <p class="proof-big">+1.36 °C</p>
+              <p>1980s average 14.35 °C, 2015–2024 average 15.71 °C. Every one of the last 10 years is warmer than the 1980s average.</p>
+            </article>
+            <article class="proof-card">
+              <p class="proof-kicker">…and the melody</p>
+              <p class="proof-big">≈ 10 semitones higher</p>
+              <p>The 2015–2024 notes sit on average 994 cents above the 1980s notes. A warmer year never plays a lower note (checked for all 44 years).</p>
+            </article>
+            <article class="proof-card">
+              <p class="proof-kicker">Night lights · VIIRS Black Marble</p>
+              <p class="proof-big">+69 %</p>
+              <p>Total detected light 2012 → 2023, measured by the app from the NASA frames. Treated as relative brightness: the 2022 jump may partly come from changes in the yearly composites.</p>
+            </article>
+            <article class="proof-card">
+              <p class="proof-kicker">Ocean · ECCO2 colours decoded</p>
+              <p class="proof-big">9 of 10</p>
+              <p>pairs of known places come out in the right warm-to-cold order (warm pool, Arabian Sea, Gulf Stream, North Atlantic, Southern Ocean). The one miss differs by 0.01.</p>
+            </article>
+          </div>
+          <p class="limits"><b>Limits</b> Ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). Mingachevir values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.</p>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="panel-rec" aria-labelledby="tab-rec" tabindex="0" hidden>
+        <div class="panel-cols">
+          <div>
+            <h3>Recordings</h3>
         <p class="small muted">Each scene rendered by the app as lossless FLAC, sound legend and layer intro included.</p>
         <ul class="recs">
           <li><span>Ocean</span><audio controls preload="none" src="assets/audio/ocean.flac"></audio><a href="assets/audio/ocean.flac" download>FLAC</a></li>
@@ -240,29 +280,30 @@
           <li><span>Lightning</span><audio controls preload="none" src="assets/audio/lightning.flac"></audio><a href="assets/audio/lightning.flac" download>FLAC</a></li>
           <li><span>CO₂</span><audio controls preload="none" src="assets/audio/co2.flac"></audio><a href="assets/audio/co2.flac" download>FLAC</a></li>
         </ul>
-
-        <h3>Data source</h3>
+          </div>
+          <div>
+            <h3>Data source</h3>
         <p id="credit" class="small"></p>
-
-        <details class="how">
+            <details class="how">
           <summary>How the sonification works</summary>
           <p class="small">Each frame of the NASA visualization is drawn into a hidden canvas and analysed pixel by pixel (192 × 96 grid). The pixel colours are converted back into data values using the visualization's own colour scale. Before the music starts, a sound legend plays the lowest and the highest value once, like the axis of a chart. A slow sweep then moves from west to east once per bar. Each of the 8 slices of the map becomes a note: its value sets the pitch, how much of it contains data sets the loudness, and its position sets the stereo pan. The layers enter one at a time, and you can switch each one on or off. Notes use quarter-tone maqam scales (Rast, Saba, Hijaz): the value picks a scale degree and what is left over bends the note by up to 25 cents, so small differences in the data stay audible. In the CO₂ scene the chord's two voices drift apart in cents as concentration rises, and you hear them beat. A soft knock marks a slice with no data, for example land in the ocean scene.</p>
         </details>
+          </div>
+        </div>
       </div>
-    </section>
-  </main>
-
-  <section id="about" class="about" aria-labelledby="about-title">
-    <h2 id="about-title" data-i18n="aboutTitle">About the project</h2>
-    <div class="about-grid">
+      <div class="tab-panel" role="tabpanel" id="panel-about" aria-labelledby="tab-about" tabindex="0" hidden>
+        <h2 id="about-title" data-i18n="aboutTitle">About the project</h2>
+        <div class="about-grid">
       <div><h3>The problem</h3><p>NASA's Earth Information Center shows how our planet is changing through beautiful visualizations, but only to people who can see them. More than 2.2 billion people live with a vision impairment (WHO), and many more learn better by listening.</p></div>
       <div><h3>Our answer</h3><p>Polyphonic Earth reads every frame of NASA visualizations and NASA POWER data and plays them as music in real time. Pitch, loudness, rhythm and stereo carry the data; descriptions, Listen by Touch and a visual mode make it usable with or without sight or hearing.</p></div>
       <div><h3>Why accessibility</h3><p>Climate data belongs to everyone. Designing for blind and deaf visitors first gave us features that help every listener: a sound legend before the music, layers that enter one at a time, and plain explanations of what each sound means.</p></div>
       <div><h3>Team</h3><p>Open Guys AI, NASA Space Apps Challenge 2026, Mingachevir, Azerbaijan. The start-screen theme song is an original composition by our teammate Ali Aliyev. Built with open NASA data, Tone.js and an AI coding assistant; the concept, data choices, sound design decisions and testing are ours.</p></div>
     </div>
-    <p class="about-links small"><a href="https://github.com/amil060/polyphonic-earth">Source code on GitHub</a> · Demo video: added with the final submission</p>
-  </section>
-
+    
+        <p class="about-links small"><a href="https://github.com/amil060/polyphonic-earth">Source code on GitHub</a> · <a href="https://github.com/amil060/polyphonic-earth#does-the-sound-tell-the-truth">How we measured the proof</a></p>
+      </div>
+    </section>
+  </main>
   <footer class="foot">
     <p class="small muted">Built for the 2026 NASA Space Apps Challenge by team <strong>Open Guys AI</strong> (Mingachevir, Azerbaijan). Visualizations courtesy of NASA's Scientific Visualization Studio / Earth Information Center. Audio: <a href="https://tonejs.github.io/">Tone.js</a>.</p>
   </footer>
@@ -295,6 +336,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261115181453"></script>
+  <script type="module" src="js/main.js?v=20261115182213"></script>
 </body>
 </html>

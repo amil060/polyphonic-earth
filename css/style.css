@@ -454,3 +454,59 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---- Polish pass: quieter map overlay, layers popover, tabs below the map, proof cards ---- */
+.scene-card .scene-listen { background: none; border: 0; box-shadow: none; padding: 0; color: var(--text-2); font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.scene-card .scene-listen::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: middle; }
+.scene-card #scene-sub { font-size: 13px; color: var(--muted); }
+
+.layers-pop { position: relative; display: inline-flex; border-left: 1px solid var(--hair); padding-left: 4px; }
+.layers-pop > summary { list-style: none; display: inline-flex; align-items: center; color: var(--text-2); }
+.layers-pop > summary::-webkit-details-marker { display: none; }
+.layers-pop > summary::after { content: "▴"; margin-left: 6px; font-size: 10px; }
+.layers-pop[open] > summary { color: var(--text); border-color: var(--hair-strong); }
+.layers-pop .layers { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 5; border: 1px solid var(--hair-strong); border-radius: var(--r-card); background: var(--card); padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.layers-pop .layers-label { display: none; }
+
+.info { display: block; padding-top: 32px; }
+.info-live { max-width: 880px; }
+.info-tabs { display: flex; gap: 4px; margin: 28px 0 0; border-bottom: 1px solid var(--hair); overflow-x: auto; scrollbar-width: none; }
+.info-tabs [role="tab"] { flex: none; min-height: 44px; padding: 0 16px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--text-2); font: 500 14px var(--font); cursor: pointer; }
+.info-tabs [role="tab"]:hover { color: var(--text); }
+.info-tabs [role="tab"][aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.info-tabs [role="tab"]:focus-visible, .tab-panel:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tab-panel { padding: 28px 0 8px; }
+.tab-panel[hidden] { display: none; }
+.panel-cols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; }
+.panel-cols h3:first-child { margin-top: 0; }
+.tab-panel .about-grid { margin-top: 16px; }
+
+.proof-intro { color: var(--text-2); margin: 4px 0 20px; max-width: 70ch; }
+.proof-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.proof-card { background: var(--card); border: 1px solid var(--hair); border-radius: var(--r-card); padding: 16px; display: grid; gap: 6px; align-content: start; }
+.proof-card p { margin: 0; font-size: 13px; line-height: 20px; color: var(--text-2); }
+.proof-card .proof-kicker { font: 500 12px/1.4 var(--mono); color: var(--muted); }
+.proof-card .proof-big { font: 500 28px/1.15 var(--font); color: var(--text); letter-spacing: -0.01em; }
+.proof-hero { box-shadow: inset 2px 0 0 var(--accent); }
+.proof-hero .proof-big { color: var(--accent); }
+@media (max-width: 1100px) { .proof-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .panel-cols { grid-template-columns: 1fr; gap: 24px; } }
+@media (max-width: 560px) { .proof-grid { grid-template-columns: 1fr; } .info-tabs [role="tab"] { padding: 0 12px; } }
+
+/* Phones: one scrolling row of scenes, a one-line readout, so the map moves up */
+@media (max-width: 860px) {
+  .hud-side .tabs { display: flex; flex-direction: row; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .hud-side .tabs::-webkit-scrollbar { display: none; }
+  .hud-side .tabs > li { flex: none; }
+  .hud-side { padding: 4px; }
+  .hud-top .readout { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .hud-top .readout strong { font-size: 16px; }
+  .scene-card h2 { font-size: 20px; line-height: 28px; }
+  .layers-pop { flex-wrap: wrap; width: 100%; border-left: 0; padding-left: 0; }
+  .layers-pop .layers { position: static; width: 100%; flex-wrap: wrap; box-shadow: none; margin-top: 6px; }
+  .layers-pop > summary::after { content: "▾"; }
+}
+
+/* Listen by Touch: a live request to the NASA POWER API just answered */
+.measured.is-live { color: var(--text); }
+.measured.is-live::before { content: "LIVE"; display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 4px; font: 600 10px/16px var(--mono); letter-spacing: .06em; color: #fff; background: var(--live); vertical-align: 1px; }
