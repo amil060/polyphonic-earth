@@ -9,7 +9,7 @@ import { co2 } from './scenes/co2.js';
 import { caspian } from './scenes/caspian.js';
 import { climateAt } from './power.js';
 import { icon } from './icons.js';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115183807';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115184110';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -30,6 +30,8 @@ const el = {
 
 const engine = new Engine();
 const analyzer = new Analyzer();
+// 60-second tour state (logic at the end of this file); declared early because pause() and the loop read it.
+const tour = { on: false, i: 0, timer: 0, switching: false };
 const state = {
   scene: null, playing: false, touch: false,
   cols: [], stats: { mean: 0, coverage: 0, energy: 0, motion: 0, north: 0, south: 0 },
@@ -353,7 +355,7 @@ function ensureLoop() {
       if (state.bar === 3) Tone.getContext().draw.schedule(hideCallout, time);
       // Layers enter one at a time: melody alone, then harmony, bass and texture every two bars.
       if (!state.layerManual) {
-        const want = Math.min(s.layers.length, 1 + Math.floor((state.bar - 1) / 2));
+        const want = Math.min(s.layers.length, tour.on ? state.bar : 1 + Math.floor((state.bar - 1) / 2));
         const before = state.layers.size;
         s.layers.slice(0, want).forEach((l) => state.layers.add(l.id));
         if (state.layers.size !== before) {
@@ -426,7 +428,7 @@ function play() {
   if (!state.scene.nodes) state.scene.build(engine);
   hideSummary();
   if (state.finished) restartScene(); // Play after the end starts the scene again from the beginning
-  if (state.needsIntro) { startIntro(); state.needsIntro = false; }
+  if (state.needsIntro) { startIntro(); state.needsIntro = false; narrate(state.scene); }
   ensureLoop();
   Tone.getContext().transport.start('+0.05');
   if (state.scene.media.type === 'video') el.video.play().catch(() => {});
@@ -529,6 +531,7 @@ function restartScene() {
 el.video.addEventListener('ended', () => finishScene());
 
 function pause() {
+  if (tour.on && !tour.switching) stopTour();
   Tone.getContext().transport.pause();
   el.video.pause();
   state.playing = false;
@@ -550,7 +553,7 @@ const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.strin
 /** Read text aloud with the browser's own voice, for listeners without a screen reader. */
 function speak(text) {
   if (!settings.speak || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
+  if (!state.narrSpeaking) speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en'; // generated descriptions are written in English
   u.rate = settings.rate;
@@ -779,6 +782,13 @@ el.start.addEventListener('click', async () => {
     if (!state.playing) play();
     return;
   }
+  if (!(await bootAudio())) return;
+  el.stage.focus({ preventScroll: true });
+  play();
+});
+
+// Unlock audio and load the first scene (shared by Listen to Earth and the 60-second tour).
+async function bootAudio() {
   el.start.disabled = true;
   el.start.querySelector('.cta-label').textContent = t('loading');
   $('intro-desc').textContent = t('loading');
@@ -788,13 +798,13 @@ el.start.addEventListener('click', async () => {
     el.start.disabled = false;
     $('intro-desc').textContent = t('failStart');
     console.error(err);
-    return;
+    return false;
   }
   el.start.disabled = false;
   if (Tone.getContext().state !== 'running') {
     $('intro-desc').textContent = t('tapAgain');
     try { await Tone.getContext().resume(); } catch { /* ignore */ }
-    if (Tone.getContext().state !== 'running') return;
+    if (Tone.getContext().state !== 'running') return false;
   }
   engine.setVolume(Number(el.volume.value));
   engine.setMono(settings.mono);
@@ -802,9 +812,8 @@ el.start.addEventListener('click', async () => {
   if (!state.scene) await selectScene(0);
   else state.scene.build(engine);
   Tone.getContext().transport.bpm.value = state.scene.bpm;
-  el.stage.focus({ preventScroll: true });
-  play();
-});
+  return true;
+}
 
 el.play.addEventListener('click', togglePlay);
 el.touch.addEventListener('click', () => setTouch(!state.touch));
@@ -848,7 +857,7 @@ document.addEventListener('keydown', (e) => {
     case ']': if (state.scene === nightlights) showYear(state.yearIndex + 1); break;
     case '-': el.volume.value = String(Math.max(0, Number(el.volume.value) - 10)); engine.setVolume(Number(el.volume.value)); break;
     case '=': case '+': el.volume.value = String(Math.min(100, Number(el.volume.value) + 10)); engine.setVolume(Number(el.volume.value)); break;
-    case 'escape': if (state.touch) setTouch(false); break;
+    case 'escape': if (tour.on) { stopTour(); pause(); } else if (state.touch) setTouch(false); break;
     default: break;
   }
 });
@@ -1046,3 +1055,72 @@ el.start.focus();
   });
   document.addEventListener('click', (e) => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
 }
+
+
+// ---------- Narrator: each scene introduces itself in one first-person line ----------
+// Shown over the map for a few seconds, sent to screen readers, and spoken in the interface
+// language when "spoken descriptions" is on.
+let narrTimer = 0;
+function narrate(s) {
+  const line = t('nar.' + s.id);
+  const box = $('narrator');
+  if (!line || line === 'nar.' + s.id || !box) return;
+  box.textContent = line;
+  box.hidden = false;
+  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+  clearTimeout(narrTimer);
+  narrTimer = setTimeout(() => { box.hidden = true; }, 6500);
+  el.probeLive.textContent = line;
+  if (settings.speak && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(line);
+    u.lang = getLang();
+    u.rate = settings.rate;
+    state.narrSpeaking = true;
+    u.onend = u.onerror = () => { state.narrSpeaking = false; };
+    speechSynthesis.speak(u);
+  }
+}
+
+// ---------- 60-second tour: every scene for about ten seconds, ending on Mingachevir ----------
+// The last scene (Caspian) plays its 44 years to the end and shows its summary; the tour ends there.
+// Pause, Escape, a scene key or Stop tour hand control back to the listener.
+const TOUR_SECONDS = 9;
+function renderTour() {
+  const pill = $('tour-pill');
+  pill.hidden = !tour.on;
+  if (tour.on) $('tour-step').textContent = `${t('tourStep')} ${tour.i + 1}/${SCENES.length} · ${SCENES[tour.i].short}`;
+  $('tour-btn').setAttribute('aria-pressed', String(tour.on));
+}
+async function tourGo(i) {
+  clearTimeout(tour.timer);
+  tour.i = i;
+  renderTour();
+  tour.switching = true;
+  if (state.scene === SCENES[i]) { if (state.playing) pause(); restartScene(); }
+  else await selectScene(i);
+  tour.switching = false;
+  if (!tour.on) return;
+  hideSummary();
+  play();
+  if (i < SCENES.length - 1) tour.timer = setTimeout(() => { if (tour.on) tourGo(i + 1); }, TOUR_SECONDS * 1000);
+}
+async function startTour() {
+  if (!engine.started && !(await bootAudio())) return;
+  if (tour.on) return;
+  el.intro.hidden = true;
+  if (state.touch) setTouch(false);
+  tour.on = true;
+  el.stage.focus({ preventScroll: true });
+  setLive(`Tour: all ${SCENES.length} scenes, about ten seconds each, ending with Mingachevir. Press Escape to stop.`);
+  await tourGo(0);
+}
+function stopTour() {
+  if (!tour.on) return;
+  tour.on = false;
+  clearTimeout(tour.timer);
+  renderTour();
+}
+$('tour-start').addEventListener('click', startTour);
+$('tour-btn').addEventListener('click', () => { if (tour.on) { stopTour(); pause(); } else startTour(); });
+$('tour-stop').addEventListener('click', () => { stopTour(); pause(); el.play.focus(); });

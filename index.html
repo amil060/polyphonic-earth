@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261115183807">
+  <link rel="stylesheet" href="css/style.css?v=20261115184304">
   <meta name="theme-color" content="#0b0d14">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Polyphonic Earth: hear NASA Earth data as music">
@@ -32,6 +32,7 @@
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           <span class="cta-label" data-i18n="cta">Listen to Earth</span>
         </button>
+        <button id="tour-start" class="btn tour-start" type="button" data-i18n="tour">Hear all five in 60 s</button>
         <button id="visual-only" class="btn btn-ghost" type="button" data-i18n="visual">Explore without sound</button>
       </div>
       <p class="intro-sub"><span data-i18n="hp">Best with headphones</span></p>
@@ -66,6 +67,7 @@
     </div>
     <div class="top-actions">
       <label class="lang-pick"><span class="sr-only" data-i18n="lang">Language</span><select id="lang"><option value="en" lang="en">EN</option><option value="az" lang="az">AZ</option><option value="es" lang="es">ES</option><option value="ru" lang="ru">RU</option></select></label>
+      <button id="tour-btn" class="btn btn-ghost tour-btn" type="button" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span data-i18n="tour">Hear all five in 60 s</span></button>
       <details class="menu" id="menu">
         <summary class="btn btn-ghost"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="menu">Menu</span></summary>
         <div class="menu-list">
@@ -96,6 +98,8 @@
             <h2 id="scene-title">Scene</h2>
             <p id="scene-sub"></p>
             <p id="scene-listen" class="scene-listen"></p>
+            <p id="narrator" class="narrator" aria-hidden="true" hidden></p>
+            <p id="tour-pill" class="tour-pill" hidden><span id="tour-step"></span> <button id="tour-stop" type="button" data-i18n="tourStop">Stop tour</button></p>
             <p id="touch-badge" class="badge" hidden>Listen by Touch is on · use the arrows or your pointer · Esc to stop</p>
           </div>
           <div class="readout" aria-hidden="true">
@@ -334,6 +338,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261115183807"></script>
+  <script type="module" src="js/main.js?v=20261115184304"></script>
 </body>
 </html>
