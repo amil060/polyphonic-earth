@@ -23,7 +23,7 @@ Each member pushes their own work to the repo **from their own computer, with th
   - Can they go from the start screen to the map?
   - Can they start the Ocean scene? Do they understand the sound legend (lowest and highest note)?
   - With Listen by Touch, can they find warm and cold places with a finger?
-  - In the Mingachevir scene, do they hear the temperature rising?
+  - In the Azerbaijan scene, do they hear the cities get warmer decade by decade?
   - Is the end-of-scene summary read out?
   - Ask for one sentence about the experience, with written consent (name or anonymous)
 - [ ] Report what you find as GitHub **Issues** (Issues → New issue)
@@ -33,7 +33,7 @@ Each member pushes their own work to the repo **from their own computer, with th
 - [ ] Record the 30-second demo video (screen recording + app audio). The script is in section 6 of [PLAN.md](PLAN.md):
   - 0–4 s: black screen and sound: *"2.2 billion people can't see NASA's maps of our planet."*
   - 4–8 s: a hand on the screen, Listen by Touch
-  - 8–22 s: the 5 scenes, about 3 s each, ending on Mingachevir (+1.4 °C)
+  - 8–22 s: the 5 scenes, about 3 s each, ending on Azerbaijan (all eight cities warmer)
   - 22–27 s: the test user's quote (with consent)
   - 27–30 s: logo + link + "Powered by NASA data"
 - [ ] Add **English subtitles** (required by the rules)

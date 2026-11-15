@@ -19,7 +19,7 @@
 | **Relevance** | All scenes are EIC/SVS visualizations; NASA data is the core of the project. Every scene shows its source and credit. |
 | **Presentation** | 30-second demo video (with sound and English subtitles), a "How it works" section in the README, and a live link. |
 
-**Target global awards:** 1) Art & Technology · 2) Best Use of Data · 3) Most Inspirational. The Caspian & Mingachevir scene is our strongest card for the local judges.
+**Target global awards:** 1) Art & Technology · 2) Best Use of Data · 3) Most Inspirational. The Azerbaijan scene (eight cities, west to east) is our strongest card for the local judges.
 
 ## 3. Product: what we built
 
@@ -30,7 +30,7 @@
 | 🌊 **Ocean** | [Sea Surface Currents & Temperature](https://svs.gsfc.nasa.gov/3912/) | Temperature colour → sweep melody pitch (warm = high, cold = low, land = silence) · global warmth → pad chord from minor to major · current motion → filter shimmer |
 | 🌃 **Night Lights 2012→2023** | [Change in Night Lights](https://svs.gsfc.nasa.gov/5313/) | **Time Machine** slider across the years · city lights → bells, pitched by latitude · light growth vs 2012 → rising bass drone · Change mode: brighter = rising chimes, darker = falling tones |
 | ⚡ **Lightning (ISS)** | [Lightning Events 2017–2023](https://svs.gsfc.nasa.gov/5011/) | Each slice with flashes → drum hit · distance from equator → drum pitch · longitude → stereo · global storm activity → rain noise |
-| 🇦🇿 **Caspian & Mingachevir** | [NASA POWER](https://power.larc.nasa.gov/) 1981–2024 + NASA GIBS MODIS image | One note per year of measured air temperature in Mingachevir over a drone at the 1980s average · the melody climbs as the region warms (+1.36 °C) |
+| 🇦🇿 **Azerbaijan, west to east** | [NASA POWER](https://power.larc.nasa.gov/) 1981–2024 + NASA GIBS MODIS image | Eight cities from Nakhchivan to Baku, played west to east (left ear to right ear); one bar per decade, 1980s → 2020s · pitch = how much warmer each city is than its own 1980s average · all eight are warmer in the 2020s (+1.5 to +1.9 °C) |
 | 🏭 **CO₂** | [DYAMOND CO₂](https://svs.gsfc.nasa.gov/5196/) | CO₂ concentration → increasing dissonance (tritone, minor second, cluster) · average level → filter brightness · strong plumes → gritty melody · plume coverage → low haze rumble |
 
 ### 3.2 Features in every scene

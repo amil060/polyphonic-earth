@@ -36,11 +36,12 @@ We measured it. Every number below comes from the app's own data and code; nothi
 | Check | Data | Result |
 |---|---|---|
 | **Mingachevir warming** | NASA POWER annual mean air temperature, 1981–2024 | 1981–1990 average **14.35 °C**, 2015–2024 average **15.71 °C**: **+1.36 °C**. All of the last 10 years are above the 1980s average. Linear trend +0.44 °C per decade. |
-| **…and the melody** | The same series through the app's pitch mapping (Rast maqam, 2 octaves) | The 2015–2024 notes sit on average **994 cents (about 10 semitones) higher** than the 1980s notes. The mapping is monotonic: a warmer year never plays a lower note (checked for every pair of the 44 years). |
+| **Azerbaijan, eight cities** | NASA POWER, decade averages vs each city's own 1981–1990 average | **All 8 cities are warmer in the 2020s** (2021–2024), from +1.51 °C (Nakhchivan) to +1.91 °C (Lankaran); the eight-city average is **+1.66 °C**. The 2020s decade has only four years so far. |
+| **…and the melody** | The same numbers through the app's pitch mapping (Rast maqam, 2 octaves) | The 2020s notes sit on average **2,079 cents (about 21 semitones) higher** than the 1980s notes. The mapping is monotonic: a warmer city-decade never plays a lower note (checked for every pair of the 40 city-decades). |
 | **Night lights 2012 → 2023** | Total detected light in the VIIRS Black Marble frames, measured by the app | **+69 %** over the period (2013 +4 %, 2017 +20 %, 2021 +28 %, 2022 +55 %, 2023 +69 %). The jump in 2022 may partly come from changes in the yearly composites, so we treat it as relative brightness, not official radiance. |
 | **Ocean temperature order** | ECCO2 colours decoded at known places, averaged over 17 frames | Decoded values (0 = coldest colour, 1 = warmest): West Pacific warm pool 0.89, Arabian Sea 0.90, Gulf Stream 0.58, North Atlantic 0.34, Southern Ocean 0.20. Against typical annual sea surface temperatures (about 29, 27.5, 22, 10 and 1 °C), **9 of 10 pairs are in the right order**; the one miss (warm pool vs Arabian Sea) differs by 0.01. The eastern equatorial Pacific had too few coloured pixels to read. |
 
-Limits: ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). Mingachevir values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.
+Limits: ocean and CO₂ values are positions on each visualization's colour scale, not °C or ppm, and both are model output (ECCO2, GEOS). City values are MERRA-2 reanalysis for the grid cell around the city, not a single weather station.
 
 ### Recordings
 Each scene rendered by the app, sound legend and layer intro included, as lossless FLAC: [ocean](assets/audio/ocean.flac) · [night lights](assets/audio/nightlights.flac) · [lightning](assets/audio/lightning.flac) · [CO₂](assets/audio/co2.flac) · [Azerbaijan](assets/audio/azerbaijan.flac).

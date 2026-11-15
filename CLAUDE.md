@@ -5,7 +5,7 @@ NASA Space Apps 2026 — "The Earth Information Jukebox" challenge. Team: Open G
 
 ## What it is
 A browser web app that sonifies NASA Earth Information Center (EIC/SVS) visualizations in real time:
-5 scenes (Ocean, Night Lights 2012→2023, Lightning, CO₂, and the local Caspian & Mingachevir scene), each with its own instrument language,
+5 scenes (Ocean, Night Lights 2012→2023, Lightning, CO₂, and the local Azerbaijan scene: eight cities west to east, one bar per decade, NASA POWER), each with its own instrument language,
 plus Listen-by-Touch, Time Machine slider, stereo mapping, and a "What am I hearing?" legend.
 
 ## Rules
