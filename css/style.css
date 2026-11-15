@@ -510,3 +510,28 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 /* Listen by Touch: a live request to the NASA POWER API just answered */
 .measured.is-live { color: var(--text); }
 .measured.is-live::before { content: "LIVE"; display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 4px; font: 600 10px/16px var(--mono); letter-spacing: .06em; color: #fff; background: var(--live); vertical-align: 1px; }
+
+/* ---- Simplification pass: one menu in the header, larger reading text, less text over the map ---- */
+.menu { position: relative; }
+.menu > summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu > summary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; min-width: 220px; display: grid; padding: 6px; background: var(--card); border: 1px solid var(--hair-strong); border-radius: var(--r-card); box-shadow: 0 12px 32px rgba(0,0,0,.55); }
+.menu-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--text); font: 400 15px var(--font); text-align: left; cursor: pointer; }
+.menu-item:hover { background: var(--raised); }
+.menu-item:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+#help-btn.menu-item { display: flex; }
+
+/* Over the map: title and the one-line listening guide only; the model note lives in "This scene" */
+.scene-card #scene-sub { display: none; }
+.readout { opacity: .9; }
+
+/* Reading text at 16 px below the map and in dialogs */
+body { font-size: 16px; }
+.live { font-size: 16px; line-height: 24px; }
+.flow span, .legend b { font-size: 16px; line-height: 24px; }
+.legend span, .limits, .proof-card p, .about-grid p, .set-row small { font-size: 15px; line-height: 23px; }
+.summary-cols p, .callout-meaning { font-size: 16px; line-height: 24px; }
+.intro-line { font-size: 18px; line-height: 28px; max-width: 46ch; color: var(--text-2); }
+.intro-sub { font-size: 14px; }
+@media (max-width: 860px) { #help-btn.menu-item { display: none; } .menu > summary span { display: none; } }

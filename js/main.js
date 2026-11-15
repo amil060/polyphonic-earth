@@ -9,7 +9,7 @@ import { co2 } from './scenes/co2.js';
 import { caspian } from './scenes/caspian.js';
 import { climateAt } from './power.js';
 import { icon } from './icons.js';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115183807';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -1035,4 +1035,14 @@ el.start.focus();
       select(tabs[to], true);
     });
   });
+}
+
+// Header menu (What is this? · Listening settings · Keyboard): closes after a choice, on Escape and on outside click.
+{
+  const menu = document.getElementById('menu');
+  menu.querySelectorAll('.menu-item').forEach((b) => b.addEventListener('click', () => { menu.open = false; }));
+  menu.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu.open) { e.stopPropagation(); menu.open = false; menu.querySelector('summary').focus(); }
+  });
+  document.addEventListener('click', (e) => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
 }
