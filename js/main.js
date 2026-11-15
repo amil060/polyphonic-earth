@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115195842';
-import { Engine, clamp01 } from './engine.js?v=20261115195842';
-import { ocean } from './scenes/ocean.js?v=20261115195842';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115195842';
-import { lightning } from './scenes/lightning.js?v=20261115195842';
-import { co2 } from './scenes/co2.js?v=20261115195842';
-import { caspian } from './scenes/caspian.js?v=20261115195842';
-import { climateAt } from './power.js?v=20261115195842';
-import { icon } from './icons.js?v=20261115195842';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115195842';
+import { Analyzer } from './analyzer.js?v=20261115200129';
+import { Engine, clamp01 } from './engine.js?v=20261115200129';
+import { ocean } from './scenes/ocean.js?v=20261115200129';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115200129';
+import { lightning } from './scenes/lightning.js?v=20261115200129';
+import { co2 } from './scenes/co2.js?v=20261115200129';
+import { caspian } from './scenes/caspian.js?v=20261115200129';
+import { climateAt } from './power.js?v=20261115200129';
+import { icon } from './icons.js?v=20261115200129';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115200129';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -833,7 +833,7 @@ $('visual-only').addEventListener('click', () => {
 $('about-btn').addEventListener('click', () => {
   el.intro.hidden = false;
   $('intro-desc').textContent = t('q');
-  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('cta');
+  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('mBoth');
   el.start.focus();
 });
 el.start.addEventListener('click', async () => {
@@ -858,11 +858,13 @@ async function bootAudio() {
     await engine.start();
   } catch (err) {
     el.start.disabled = false;
+    el.start.querySelector('.cta-label').textContent = t('mBoth');
     $('intro-desc').textContent = t('failStart');
     console.error(err);
     return false;
   }
   el.start.disabled = false;
+  el.start.querySelector('.cta-label').textContent = t('mBoth');
   if (Tone.getContext().state !== 'running') {
     $('intro-desc').textContent = t('tapAgain');
     try { await Tone.getContext().resume(); } catch { /* ignore */ }
@@ -1064,7 +1066,7 @@ function renderLang() {
   document.querySelectorAll('.intro-langs [data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === getLang())));
   const playing = el.play.getAttribute('aria-pressed') === 'true';
   el.play.querySelector('span').textContent = t(playing ? 'pause' : state.finished ? 'again' : 'play');
-  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('cta');
+  el.start.querySelector('.cta-label').textContent = engine.started ? t('back') : t('mBoth');
   themeUI();
   if (state.scene) $('scene-listen').textContent = t('listen.' + state.scene.id);
 }
@@ -1311,3 +1313,20 @@ document.querySelectorAll('.recs audio').forEach((a) => a.addEventListener('play
   if (!theme.audio.paused) stopTheme(300);
   if (state.playing) pause();
 }));
+
+
+// ---------- Start screen: choose how to explore ----------
+// "I listen": spoken descriptions and the guide on, then the usual start. "I watch": the silent map
+// (captions are always on there) and, on Android, vibration. "Listen and watch": the usual start.
+$('mode-listen').addEventListener('click', () => {
+  settings.speak = true;
+  settings.guide = true;
+  saveSettings();
+  el.start.click(); // still inside the same tap, so audio is allowed to start
+});
+$('visual-only').addEventListener('click', () => {
+  if (canVibrate && !settings.vibrate) { settings.vibrate = true; saveSettings(); }
+});
+const openSettings = () => { applySettings(); $('settings').showModal(); };
+$('a11y-btn').addEventListener('click', openSettings);
+$('intro-a11y').addEventListener('click', openSettings);

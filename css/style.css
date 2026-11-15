@@ -555,7 +555,7 @@ body { font-size: 16px; }
 .tour-pill[hidden] { display: none !important; }
 .tour-pill button { min-height: 32px; padding: 0 12px; border-radius: 999px; border: 0; background: var(--text); color: var(--deep); font: 500 13px var(--font); cursor: pointer; }
 .tour-pill button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-@media (max-width: 860px) { .tour-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .tour-btn { padding: 0 12px; } .narrator { font-size: 16px !important; } }
+@media (max-width: 860px) { .tour-btn .tour-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .tour-btn { padding: 0 12px; } .narrator { font-size: 16px !important; } }
 @media (prefers-reduced-motion: reduce) { .narrator.enter { animation: none; } }
 
 /* About: what's next */
@@ -578,3 +578,34 @@ body { font-size: 16px; }
 .captions { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 5; max-width: min(720px, calc(100% - 32px)); margin: 0; padding: 6px 14px; border-radius: 8px; background: rgba(0, 0, 0, 0.82); color: #fff; font: 500 17px/1.4 var(--font); text-align: center; }
 .captions[hidden] { display: none; }
 @media (max-width: 860px) { .captions { position: static; transform: none; max-width: none; margin: 8px 16px 0; font-size: 16px; } }
+
+/* ---- Landing: choose how to explore ---- */
+.choose-title { margin: 8px 0 0; font-size: 20px; line-height: 28px; font-weight: 500; color: var(--text); }
+.modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: min(880px, 100%); }
+.mode { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; row-gap: 4px; align-items: center; text-align: left; min-height: 112px; padding: 16px 18px; border-radius: var(--r-panel); border: 1px solid var(--hair-strong); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; transition: background-color 150ms var(--ease), border-color 150ms var(--ease), transform 150ms var(--ease); }
+.mode:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+.mode:active { transform: scale(0.99); }
+.mode:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.mode svg { grid-row: 1 / span 2; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--accent); }
+.mode b { font: 500 19px/1.25 var(--font); }
+.mode small { grid-column: 2; font-size: 14px; line-height: 20px; color: var(--text-2); }
+.mode-main { background: var(--text); color: var(--deep); border-color: var(--text); }
+.mode-main:hover { background: #fff; }
+.mode-main small { color: #3b4150; }
+.mode-main svg { color: var(--deep); fill: currentColor; stroke: none; }
+.mode[disabled] { opacity: .7; cursor: progress; }
+.intro-alt { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.a11y-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.a11y-link svg, .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.intro-how { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; font: 500 13px var(--mono); color: var(--muted); }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 10px; }
+.tour-short { display: none; }
+@media (max-width: 860px) {
+  .modes { grid-template-columns: 1fr; }
+  .mode { min-height: 84px; }
+  .tour-btn .tour-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tour-btn .tour-short { display: inline; font: 500 13px var(--font); }
+}
+.mode svg { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+.mode b { grid-column: 2; grid-row: 1; align-self: end; }
+.mode small { grid-column: 2; grid-row: 2; align-self: start; }
