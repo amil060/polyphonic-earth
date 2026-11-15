@@ -77,7 +77,7 @@ README.md           # story, mapping table, credits, AI use
 ## 6. Presentation (30-second video)
 - 0–4 s: black screen and sound. Subtitle: *"2.2 billion people can't see NASA's maps of our planet."*
 - 4–8 s: a hand on the screen, Listen by Touch (footage from the user test if we have it).
-- 8–22 s: the scenes, about 3 s each: Ocean → Night Lights (Time Machine) → Lightning → CO₂ → **Mingachevir (+1.4 °C)**.
+- 8–22 s: the scenes, about 3 s each: Ocean → Night Lights (Time Machine) → Lightning → CO₂ → **Azerbaijan (all eight cities warmer)**.
 - 22–27 s: the test user's one-sentence quote (subtitled), only with their written consent.
 - 27–30 s: logo, link, "Powered by NASA data". No copyrighted music: only the app's sound and Ali Aliyev's theme.
 - English subtitles (required by the rules).

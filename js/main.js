@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115215630';
-import { Engine, clamp01 } from './engine.js?v=20261115215630';
-import { ocean } from './scenes/ocean.js?v=20261115215630';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115215630';
-import { lightning } from './scenes/lightning.js?v=20261115215630';
-import { co2 } from './scenes/co2.js?v=20261115215630';
-import { caspian } from './scenes/caspian.js?v=20261115215630';
-import { climateAt } from './power.js?v=20261115215630';
-import { icon } from './icons.js?v=20261115215630';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115215630';
+import { Analyzer } from './analyzer.js?v=20261115220615';
+import { Engine, clamp01 } from './engine.js?v=20261115220615';
+import { ocean } from './scenes/ocean.js?v=20261115220615';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115220615';
+import { lightning } from './scenes/lightning.js?v=20261115220615';
+import { co2 } from './scenes/co2.js?v=20261115220615';
+import { caspian } from './scenes/caspian.js?v=20261115220615';
+import { climateAt } from './power.js?v=20261115220615';
+import { icon } from './icons.js?v=20261115220615';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115220615';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -280,7 +280,7 @@ const SCIENCE = {
   caspian: {
     data: 'NASA POWER (MERRA-2): yearly mean air temperature and rainfall for eight Azerbaijani cities, 1981–2024, from Nakhchivan in the west to Baku in the east. Image: NASA GIBS MODIS.',
     sound: 'Each bar is one decade, from the 1980s to the 2020s. The sweep plays the eight cities from west (left ear) to east (right ear). Pitch = how much warmer that city’s decade was than its own 1981–1990 average.',
-    meaning: 'Hear every city climb, decade after decade. The chord follows the national average; the drone stays at the 1980s level.',
+    meaning: 'Hear every city end higher than it started; the dip in the 2010s is real data. The chord follows the national average; the drone stays at the 1980s level.',
     limits: 'POWER values are model-based reanalysis for the grid cell (about 50 km) around each city, not single weather stations. Shaki was left out because it shares a grid cell with Mingachevir. The 2020s cover only 2021–2024.',
   },
 };

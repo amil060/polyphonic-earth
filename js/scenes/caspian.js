@@ -3,7 +3,7 @@
 // left-to-right movement is real geography: Nakhchivan sounds on the left, Baku on the right. A note's
 // pitch is how much warmer that city's decade was than its own 1981–1990 average.
 /* global Tone */
-import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115215630';
+import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115220615';
 
 const BOX = { lonW: 43, lonE: 55, latN: 48, latS: 36 }; // the satellite image bounds
 const toX = (lon) => (lon - BOX.lonW) / (BOX.lonE - BOX.lonW);
@@ -47,7 +47,7 @@ export const caspian = {
   legend: [
     { ico: 'music', title: 'Melody: one note per city', text: 'Eight cities from west (left ear) to east (right ear): Nakhchivan, Ganja, Mingachevir, Gabala, Shamakhi, Lankaran, Sumgait, Baku.' },
     { ico: 'trend', title: 'Pitch: warming since the 1980s', text: 'A higher note means that city’s decade was warmer than its own 1981–1990 average. Each bar is the next decade.' },
-    { ico: 'layers', title: 'Chord: the whole country', text: 'The chord follows the average warming of all eight cities and climbs decade by decade.' },
+    { ico: 'layers', title: 'Chord: the whole country', text: 'The chord follows the average warming of all eight cities: up through the 2000s, a small dip in the 2010s, highest in the 2020s.' },
     { ico: 'rain', title: 'Rain: rainfall', text: 'The soft rain grows in wetter places and decades.' },
   ],
 

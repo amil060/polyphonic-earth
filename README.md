@@ -18,10 +18,10 @@ Pick a scene and press play. The app reads every frame of the NASA visualization
 
 | Scene | NASA data | What you hear |
 |---|---|---|
-| 🌊 **Ocean** | ECCO2 sea surface currents & temperature | A west→east sweep melody: warm water sings high, cold water low, land is silent. The pad chord brightens as the ocean warms. Faster currents shimmer. |
+| 🌊 **Ocean** | ECCO2 sea surface currents & temperature | A west→east sweep melody: warm water sings high, cold water low, land is a soft knock. The pad chord brightens as the ocean warms. Faster currents shimmer. |
 | 🌃 **Night Lights 2012→2023** | VIIRS Black Marble | City lights ring as bells, pitched by latitude. A **Time Machine** steps through the years, and a bass drone climbs as the world grows brighter. *Change* mode plays rising chimes where light grew and falling tones where it dimmed. |
 | ⚡ **Lightning** | ISS Lightning Imaging Sensor 2017–2023 | Every slice with flashes hits a drum. Tropical storms boom low, storms far from the equator sound higher. Rain noise swells with global storm activity. |
-| 🇦🇿 **Azerbaijan, west to east** | NASA POWER 1981–2024 for eight cities + NASA GIBS MODIS | Our home country: the sweep plays eight cities from Nakhchivan (left ear) to Baku (right ear), so the left-to-right movement is real geography. Each bar is one decade, and a higher note means that city was warmer than in its own 1980s. In 2015–2024 every city was warmer than in 1981–1990, by about 1.1 to 1.5 °C. |
+| 🇦🇿 **Azerbaijan, west to east** | NASA POWER 1981–2024 for eight cities + NASA GIBS MODIS | Our home country: the sweep plays eight cities from Nakhchivan (left ear) to Baku (right ear), so the left-to-right movement is real geography. Each bar is one decade, and a higher note means that city was warmer than in its own 1980s. In 2015–2024 every city was warmer than in 1981–1990, by about 1.1 to 1.5 °C (the 2021–2024 years alone: +1.5 to +1.9 °C). |
 | 🏭 **CO₂** | DYAMOND GEOS carbon dioxide | A calm chord gains tritones and clashing seconds as CO₂ plumes intensify. The filter opens with concentration, and a gritty melody traces strong plumes. |
 
 ### How the music works
