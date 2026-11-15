@@ -565,3 +565,16 @@ body { font-size: 16px; }
 .next-list li::before { content: "0" counter(next); font: 500 12px var(--mono); color: var(--accent); }
 .next-list b { font-weight: 500; font-size: 16px; }
 .next-list span { font-size: 15px; line-height: 23px; color: var(--text-2); }
+
+/* ---- "How to listen" guide (shares the summary card) ---- */
+.guide[hidden] { display: none; }
+.guide-narr { margin: 0; font-size: 18px; line-height: 27px; font-style: italic; color: var(--text); }
+.guide-rules { margin: 0; padding: 0 0 0 18px; display: grid; gap: 6px; color: var(--text-2); font-size: 16px; line-height: 24px; }
+.guide-tones { display: flex; flex-wrap: wrap; gap: 8px; }
+.guide-tones .btn { min-height: 44px; text-align: left; }
+.guide-note { margin: 0; font-size: 13px; color: var(--muted); }
+
+/* ---- Sound captions: subtitles for the notes ---- */
+.captions { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 5; max-width: min(720px, calc(100% - 32px)); margin: 0; padding: 6px 14px; border-radius: 8px; background: rgba(0, 0, 0, 0.82); color: #fff; font: 500 17px/1.4 var(--font); text-align: center; }
+.captions[hidden] { display: none; }
+@media (max-width: 860px) { .captions { position: static; transform: none; max-width: none; margin: 8px 16px 0; font-size: 16px; } }

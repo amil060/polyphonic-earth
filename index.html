@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261115184634">
+  <link rel="stylesheet" href="css/style.css?v=20261115192303">
   <meta name="theme-color" content="#0b0d14">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Polyphonic Earth: hear NASA Earth data as music">
@@ -126,6 +126,25 @@
             <button id="summary-close" class="btn btn-ghost" type="button">Close</button>
           </div>
         </section>
+
+        <!-- "How to listen": before a scene's first play -->
+        <section id="guide" class="summary guide" aria-labelledby="guide-title" hidden>
+          <p class="summary-step" data-i18n="howTo">How to listen</p>
+          <h3 id="guide-title" tabindex="-1"></h3>
+          <p id="guide-narr" class="guide-narr"></p>
+          <ul id="guide-rules" class="guide-rules"></ul>
+          <div class="guide-tones">
+            <button id="guide-low" class="btn" type="button"></button>
+            <button id="guide-high" class="btn" type="button"></button>
+          </div>
+          <div class="summary-actions">
+            <button id="guide-start" class="btn btn-primary" type="button" data-i18n="startMusic">Start the music</button>
+          </div>
+          <p class="guide-note" data-i18n="guideNote">You can turn this guide off in Listening settings.</p>
+        </section>
+
+        <!-- Sound captions: each note in words, for deaf and hard-of-hearing listeners -->
+        <p id="captions" class="captions" aria-hidden="true" hidden></p>
 
         <!-- Sound legend callout: explains the lowest and highest note before the music starts -->
         <div id="callout" class="callout" aria-hidden="true" hidden>
@@ -320,6 +339,10 @@
   <dialog id="settings" aria-labelledby="settings-title">
     <h2 id="settings-title">Listening settings</h2>
     <form method="dialog" class="settings-form">
+      <label class="set-row"><input id="set-guide" type="checkbox"><span><b>Explain each scene before it plays</b><small>A short guide with the lowest and the highest note before the music. With spoken descriptions on, it is read aloud first and the music waits.</small></span></label>
+      <label class="set-row"><input id="set-slow" type="checkbox"><span><b>Slower playback</b><small>The sweep and the NASA animation play at 75 % speed.</small></span></label>
+      <label class="set-row"><input id="set-captions" type="checkbox"><span><b>Sound captions</b><small>Each note in words under the map, like subtitles. Always on in Explore without sound.</small></span></label>
+      <label class="set-row"><input id="set-vibrate" type="checkbox"><span><b>Vibration</b><small id="set-vibrate-note">The phone vibrates with each note and with the value under your finger in Listen by Touch. Android only; iPhone browsers do not allow it.</small></span></label>
       <label class="set-row"><input id="set-mono" type="checkbox"><span><b>Mono audio</b><small>Both ears hear everything. For one-sided hearing or a single speaker. Positions are still announced in words.</small></span></label>
       <label class="set-row"><input id="set-auto" type="checkbox"><span><b>Automatic descriptions</b><small>Describe the scene while it plays. Turn off to hear only the music; press <kbd>D</kbd> to ask for a description.</small></span></label>
       <label class="set-row"><input id="set-speak" type="checkbox"><span><b>Speak descriptions aloud</b><small id="set-speak-note">Uses your browser's voice, for listeners without a screen reader.</small></span></label>
@@ -345,6 +368,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-  <script type="module" src="js/main.js?v=20261115184634"></script>
+  <script type="module" src="js/main.js?v=20261115192303"></script>
 </body>
 </html>

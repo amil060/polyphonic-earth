@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js';
-import { Engine, clamp01 } from './engine.js';
-import { ocean } from './scenes/ocean.js';
-import { nightlights, YEARS } from './scenes/nightlights.js';
-import { lightning } from './scenes/lightning.js';
-import { co2 } from './scenes/co2.js';
-import { caspian } from './scenes/caspian.js';
-import { climateAt } from './power.js';
-import { icon } from './icons.js';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115184110';
+import { Analyzer } from './analyzer.js?v=20261115192303';
+import { Engine, clamp01 } from './engine.js?v=20261115192303';
+import { ocean } from './scenes/ocean.js?v=20261115192303';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115192303';
+import { lightning } from './scenes/lightning.js?v=20261115192303';
+import { co2 } from './scenes/co2.js?v=20261115192303';
+import { caspian } from './scenes/caspian.js?v=20261115192303';
+import { climateAt } from './power.js?v=20261115192303';
+import { icon } from './icons.js?v=20261115192303';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115192303';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -32,7 +32,13 @@ const engine = new Engine();
 const analyzer = new Analyzer();
 // 60-second tour state (logic at the end of this file); declared early because pause() and the loop read it.
 const tour = { on: false, i: 0, timer: 0, switching: false };
+// Guide, caption and vibration state (logic at the end of this file); declared early because selectScene() runs at load.
+let guideRun = 0;
+let captionTimer = 0;
+let lastBuzz = 0;
+const canVibrate = 'vibrate' in navigator;
 const state = {
+  guided: new Set(), // scenes whose "How to listen" guide has been shown
   scene: null, playing: false, touch: false,
   cols: [], stats: { mean: 0, coverage: 0, energy: 0, motion: 0, north: 0, south: 0 },
   step: -1, bar: 0, yearIndex: 0,
@@ -161,6 +167,7 @@ async function selectScene(i) {
   state.finished = false;
   state.ending = false;
   hideSummary();
+  hideGuide();
   if (s.series) s.idx = 0;
   if (s === nightlights) state.yearIndex = 0;
 
@@ -198,7 +205,7 @@ async function selectScene(i) {
   if (s.series) s.load().then(() => { if (state.scene === s) setLive(s.describe()); });
   if (engine.started) {
     s.build(engine);
-    Tone.getContext().transport.bpm.value = s.bpm;
+    applyTempo();
   }
   setLive(`${s.title}. ${s.subtitle} ${wasPlaying ? 'Playing now.' : 'Press Space to play.'}`);
   if (wasPlaying) play();
@@ -340,10 +347,10 @@ function ensureLoop() {
       const k = state.refStep++;
       if (k === 0) {
         s.reference(0, time);
-        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`, { auto: true }); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(0); showCallout('low'); caption(`♪ ${t('lowest')} · ${s.refLabels[0]}`); setLive(`Sound legend. This low note is ${s.refLabels[0]}.`, { auto: true }); }, time);
       } else if (k === 4) {
         s.reference(1, time);
-        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`, { auto: true }); }, time);
+        Tone.getContext().draw.schedule(() => { setMark(1); showCallout('high'); caption(`♪ ${t('highest')} · ${s.refLabels[1]}`); setLive(`This high note is ${s.refLabels[1]}. Now the map plays, one layer at a time.`, { auto: true }); }, time);
       }
       return;
     }
@@ -369,7 +376,7 @@ function ensureLoop() {
         if (state.yearIndex >= YEARS.length - 1) { state.ending = true; Tone.getContext().draw.schedule(() => finishScene(), time); }
         else Tone.getContext().draw.schedule(() => showYear(state.yearIndex + 1), time);
       }
-      if (state.bar % 8 === 1) Tone.getContext().draw.schedule(() => describeNow(false), time);
+      if (state.bar % 8 === 3) Tone.getContext().draw.schedule(() => describeNow(false), time);
     }
     const col = state.cols[state.step];
     const hit = col ? s.onStep(col, time, layerOn, engine) : 0;
@@ -422,13 +429,28 @@ $('layers')?.addEventListener('click', (e) => {
 });
 
 function play() {
+  // Explore without sound: run the map silently so ripples, the scale marker and captions still show the notes.
+  if (!engine.started && state.visualOnly && state.scene) {
+    bootAudio().then((ok) => { if (ok) { engine.setVolume(0); el.volume.value = '0'; play(); } });
+    return;
+  }
   if (!engine.started || !state.scene) return;
+  if (!$('guide').hidden) hideGuide();
   // Phones suspend audio when the screen locks or the tab is hidden; a tap on Play wakes it.
   if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
   if (!state.scene.nodes) state.scene.build(engine);
   hideSummary();
   if (state.finished) restartScene(); // Play after the end starts the scene again from the beginning
-  if (state.needsIntro) { startIntro(); state.needsIntro = false; narrate(state.scene); }
+  if (state.needsIntro && guideWanted(state.scene)) { openGuide(state.scene); return; }
+  applyTempo();
+  if (state.needsIntro) {
+    startIntro();
+    state.needsIntro = false;
+    if (state.skipLegend) state.refStep = REF_STEPS; // the guide has just played and explained both reference notes
+    if (!state.fromGuide) narrate(state.scene);
+    state.skipLegend = false;
+    state.fromGuide = false;
+  }
   ensureLoop();
   Tone.getContext().transport.start('+0.05');
   if (state.scene.media.type === 'video') el.video.play().catch(() => {});
@@ -546,29 +568,59 @@ const togglePlay = () => (state.playing ? pause() : play());
 // ---------- Descriptions ----------
 // ---------- Listener settings (saved on this device) ----------
 const SETTINGS_KEY = 'pe-settings';
-const settings = { mono: false, autoAnnounce: true, speak: false, rate: 1, lang: '' };
+const settings = { mono: false, autoAnnounce: true, speak: false, rate: 1, lang: '', guide: true, slow: false, captions: false, vibrate: false };
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch { /* storage blocked */ }
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ } };
 
-/** Read text aloud with the browser's own voice, for listeners without a screen reader. */
-function speak(text) {
+/**
+ * Spoken descriptions, one voice at a time. Speech queues instead of cutting itself off,
+ * the music ducks while a sentence is spoken, and the promise resolves when it has been said
+ * (with a time-out, because some browsers never fire "end" for long sentences).
+ */
+const voice = { pending: 0, token: 0 };
+function speak(text, { lang = 'en', interrupt = true } = {}) {
+  if (!settings.speak || !('speechSynthesis' in window) || !text) return Promise.resolve();
+  if (interrupt) { speechSynthesis.cancel(); voice.pending = 0; voice.token++; }
+  const token = voice.token;
+  return new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = settings.rate;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      if (token === voice.token) voice.pending = Math.max(0, voice.pending - 1);
+      if (voice.pending === 0) engine.duck(false);
+      resolve();
+    };
+    u.onend = finish;
+    u.onerror = finish;
+    setTimeout(finish, Math.max(2500, (text.length * 85) / settings.rate) + 1500);
+    voice.pending++;
+    engine.duck(true);
+    speechSynthesis.speak(u);
+  });
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Wait until the browser voice has really finished (some browsers never fire "end"), at most ~10 s. */
+async function untilQuiet() {
   if (!settings.speak || !('speechSynthesis' in window)) return;
-  if (!state.narrSpeaking) speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en'; // generated descriptions are written in English
-  u.rate = settings.rate;
-  speechSynthesis.speak(u);
+  for (let i = 0; i < 50 && speechSynthesis.speaking; i++) await wait(200);
+  await wait(250);
 }
 
 /**
  * Update the live description. Automatic updates (during playback) respect the
- * "automatic descriptions" setting; descriptions the listener asks for always play.
+ * "automatic descriptions" setting, and never replace a sentence that is still being spoken;
+ * descriptions the listener asks for always play, at once.
  */
 function setLive(text, { auto = false } = {}) {
+  if (auto && settings.speak && voice.pending > 0) return;
   el.live.textContent = text;
   if (auto && !settings.autoAnnounce) { el.live.setAttribute('aria-live', 'off'); return; }
   el.live.setAttribute('aria-live', 'polite');
-  speak(text);
+  speak(text, { interrupt: !auto });
 }
 function describeNow(manual = true) {
   const s = state.scene;
@@ -581,6 +633,10 @@ function applySettings() {
   $('set-auto').checked = settings.autoAnnounce;
   $('set-speak').checked = settings.speak;
   $('set-rate').value = String(settings.rate);
+  $('set-guide').checked = settings.guide;
+  $('set-slow').checked = settings.slow;
+  $('set-captions').checked = settings.captions;
+  $('set-vibrate').checked = settings.vibrate && canVibrate;
   $('set-rate-out').textContent = `${settings.rate.toFixed(1)}×`;
   if (engine.started) engine.setMono(settings.mono);
 }
@@ -589,6 +645,10 @@ $('settings').addEventListener('change', (e) => {
   const t = e.target;
   if (t.id === 'set-mono') settings.mono = t.checked;
   if (t.id === 'set-auto') settings.autoAnnounce = t.checked;
+  if (t.id === 'set-guide') settings.guide = t.checked;
+  if (t.id === 'set-slow') { settings.slow = t.checked; applyTempo(); }
+  if (t.id === 'set-captions') { settings.captions = t.checked; if (!t.checked) $('captions').hidden = true; }
+  if (t.id === 'set-vibrate') { settings.vibrate = t.checked; if (t.checked) buzz(1); }
   if (t.id === 'set-speak') { settings.speak = t.checked; if (!t.checked && 'speechSynthesis' in window) speechSynthesis.cancel(); }
   saveSettings();
   applySettings();
@@ -658,6 +718,7 @@ function probe(force = false) {
   const { x, y } = state.cursor;
   const v = s.series ? null : analyzer.valueAt(x, y);
   if (!s.series) engine.playProbe(v, x, s);
+  buzz(v);
   setMark(v);
   const text = `${geoText(s, x, y)}${s.label(v)}${v == null ? '' : `, ${Math.round(v * 100)}% on the colour scale`}`;
   el.readoutLabel.textContent = 'Under cursor';
@@ -688,7 +749,7 @@ state.noteTimes = [];
 function addRipple(x, y, str, col) {
   if (!state.touch && col) setMark(col.mean); // the scale marker shows the pitch of the note just played
   const now = performance.now();
-  if (col) logNote(col, str, now);
+  if (col) { logNote(col, str, now); noteCaption(col, str); buzz(str); }
   state.ripples.push({ x, y: clamp01(y), str: clamp01(str), t0: now });
   state.noteTimes.push(now);
   while (state.noteTimes.length && now - state.noteTimes[0] > 60000) state.noteTimes.shift();
@@ -811,7 +872,7 @@ async function bootAudio() {
   el.intro.hidden = true;
   if (!state.scene) await selectScene(0);
   else state.scene.build(engine);
-  Tone.getContext().transport.bpm.value = state.scene.bpm;
+  applyTempo();
   return true;
 }
 
@@ -857,7 +918,7 @@ document.addEventListener('keydown', (e) => {
     case ']': if (state.scene === nightlights) showYear(state.yearIndex + 1); break;
     case '-': el.volume.value = String(Math.max(0, Number(el.volume.value) - 10)); engine.setVolume(Number(el.volume.value)); break;
     case '=': case '+': el.volume.value = String(Math.min(100, Number(el.volume.value) + 10)); engine.setVolume(Number(el.volume.value)); break;
-    case 'escape': if (tour.on) { stopTour(); pause(); } else if (state.touch) setTouch(false); break;
+    case 'escape': if (!$('guide').hidden) hideGuide(); else if (tour.on) { stopTour(); pause(); } else if (state.touch) setTouch(false); break;
     default: break;
   }
 });
@@ -1071,15 +1132,7 @@ function narrate(s) {
   clearTimeout(narrTimer);
   narrTimer = setTimeout(() => { box.hidden = true; }, 6500);
   el.probeLive.textContent = line;
-  if (settings.speak && 'speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(line);
-    u.lang = getLang();
-    u.rate = settings.rate;
-    state.narrSpeaking = true;
-    u.onend = u.onerror = () => { state.narrSpeaking = false; };
-    speechSynthesis.speak(u);
-  }
+  speak(line, { lang: getLang() });
 }
 
 // ---------- 60-second tour: every scene for about ten seconds, ending on Mingachevir ----------
@@ -1124,3 +1177,129 @@ function stopTour() {
 $('tour-start').addEventListener('click', startTour);
 $('tour-btn').addEventListener('click', () => { if (tour.on) { stopTour(); pause(); } else startTour(); });
 $('tour-stop').addEventListener('click', () => { stopTour(); pause(); el.play.focus(); });
+
+
+// ---------- "How to listen" guide: before a scene's first play, explain it, then let the music start ----------
+// Blind listeners hear what each sound means before it plays; with spoken descriptions on, the guide
+// is read aloud, each reference note is announced and then played, and the music starts after it.
+// Without speech it is user-paced: hear the lowest or highest note as often as you like, then start.
+const guideWanted = (s) => settings.guide && !tour.on && !state.guided.has(s.id);
+function guideRules(s) { return t('listen.' + s.id).split(' · '); }
+function hideGuide() {
+  guideRun++;
+  $('guide').hidden = true;
+}
+function playRef(s, v) {
+  if (!engine.started) return;
+  if (Tone.getContext().state !== 'running') Tone.getContext().resume().catch(() => {});
+  if (!s.nodes) s.build(engine);
+  s.reference(v, Tone.now() + 0.05);
+  setMark(v);
+  showCallout(v ? 'high' : 'low');
+  caption(`♪ ${v ? t('highest') : t('lowest')} · ${s.refLabels[v]}`);
+}
+function openGuide(s) {
+  state.guided.add(s.id);
+  if (!s.nodes) s.build(engine);
+  hideSummary();
+  hideCallout();
+  $('guide-title').textContent = s.title;
+  $('guide-narr').textContent = t('nar.' + s.id);
+  $('guide-rules').innerHTML = '';
+  guideRules(s).forEach((r) => { const li = document.createElement('li'); li.textContent = r; $('guide-rules').appendChild(li); });
+  $('guide-low').textContent = `▶ ${t('lowest')}: ${s.refLabels[0]}`;
+  $('guide-high').textContent = `▶ ${t('highest')}: ${s.refLabels[1]}`;
+  const box = $('guide');
+  box.hidden = false;
+  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+  el.live.textContent = `${t('nar.' + s.id)} ${guideRules(s).join('. ')}.`;
+  $('guide-title').focus({ preventScroll: true });
+  if (innerWidth <= 860) box.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+  if (settings.speak) runGuideSpeech(s);
+}
+async function runGuideSpeech(s) {
+  const run = ++guideRun;
+  const alive = () => run === guideRun && !$('guide').hidden;
+  const ui = getLang();
+  await speak(t('nar.' + s.id), { lang: ui });
+  if (!alive()) return;
+  await speak(guideRules(s).join('. ') + '.', { lang: ui, interrupt: false });
+  if (!alive()) return;
+  await speak(`This is the lowest note: ${s.refLabels[0]}.`, { interrupt: false });
+  await untilQuiet();
+  if (!alive()) return;
+  playRef(s, 0);
+  await wait(2000);
+  if (!alive()) return;
+  await speak(`This is the highest note: ${s.refLabels[1]}.`, { interrupt: false });
+  await untilQuiet();
+  if (!alive()) return;
+  playRef(s, 1);
+  await wait(2000);
+  if (!alive()) return;
+  await speak('Now the map plays, from west to east.', { interrupt: false });
+  await untilQuiet();
+  if (!alive()) return;
+  startFromGuide(true);
+}
+function startFromGuide(legendDone) {
+  hideGuide();
+  hideCallout();
+  state.skipLegend = legendDone;
+  state.fromGuide = true;
+  play();
+  el.stage.focus({ preventScroll: true });
+}
+async function guideTone(v) {
+  guideRun++; // the listener took over: stop the automatic sequence
+  const s = state.scene;
+  const label = `${v ? 'Highest' : 'Lowest'} note: ${s.refLabels[v]}.`;
+  if (settings.speak) await speak(label);
+  else el.probeLive.textContent = label;
+  playRef(s, v);
+}
+$('guide-low').addEventListener('click', () => guideTone(0));
+$('guide-high').addEventListener('click', () => guideTone(1));
+$('guide-start').addEventListener('click', () => { if (settings.speak) speechSynthesis.cancel(); startFromGuide(false); });
+
+// ---------- Sound captions: every note in words under the map, like subtitles ----------
+// For deaf and hard-of-hearing listeners; on automatically in Explore without sound.
+const VOICE_NAME = { ocean: 'melody', nightlights: 'bell', lightning: 'drum', co2: 'chord', caspian: 'note' };
+const captionsOn = () => settings.captions || state.visualOnly;
+function caption(text) {
+  const box = $('captions');
+  if (!captionsOn()) { box.hidden = true; return; }
+  box.textContent = text;
+  box.hidden = false;
+  clearTimeout(captionTimer);
+  captionTimer = setTimeout(() => { box.hidden = true; }, 2600);
+}
+function noteCaption(col, str) {
+  const s = state.scene;
+  const v = col.mean;
+  const pitch = v >= 0.67 ? 'high' : v >= 0.34 ? 'middle' : 'low';
+  const loud = str >= 0.66 ? 'loud' : str >= 0.33 ? '' : 'soft';
+  let where = '';
+  if (col.year) where = ` · ${col.year}, ${col.t.toFixed(1)} °C`;
+  else if (s.geo) where = ` · ${fmtLatLon(latLon(s, col.x, col.lat))}`;
+  caption(`♪ ${[loud, pitch, VOICE_NAME[s.id] || 'note'].filter(Boolean).join(' ')} · ${s.label(v)}${where}`);
+}
+
+// ---------- Vibration (Android): the value under your finger, and each note ----------
+
+function buzz(strength) {
+  if (!settings.vibrate || !canVibrate || strength == null) return;
+  const now = performance.now();
+  if (now - lastBuzz < 140) return;
+  lastBuzz = now;
+  navigator.vibrate(Math.round(8 + clamp01(strength) * 42));
+}
+
+// ---------- Tempo: normal or slower (75 %) ----------
+function applyTempo() {
+  const s = state.scene;
+  const k = settings.slow ? 0.75 : 1;
+  if (s && engine.started) Tone.getContext().transport.bpm.value = s.bpm * k;
+  el.video.playbackRate = k;
+}
+if (!canVibrate) { $('set-vibrate').disabled = true; $('set-vibrate-note').textContent = 'Not available in this browser. Vibration works in Chrome on Android phones.'; }

@@ -89,7 +89,9 @@ export class Engine {
     // Visual callbacks (legend text, ripples) must not be dropped when the tab's frames lag.
     Tone.getContext().draw.expiration = 5;
     this.limiter = new Tone.Limiter(-3).toDestination();
-    this.master = new Tone.Volume(-8).connect(this.limiter);
+    // Ducking: the music drops while a description is spoken, so words and notes never compete.
+    this.duckNode = new Tone.Gain(1).connect(this.limiter);
+    this.master = new Tone.Volume(-8).connect(this.duckNode);
     // Ambient, cinematic room: long tail, a little pre-delay so notes stay clear.
     this.reverb = new Tone.Reverb({ decay: 6, preDelay: 0.04, wet: 0.4 }).connect(this.master);
     await this.reverb.generate();
@@ -131,6 +133,12 @@ export class Engine {
     } else {
       this.limiter.toDestination();
     }
+  }
+
+  /** Lower the music under speech (on) or bring it back (off). */
+  duck(on) {
+    if (!this.duckNode) return;
+    this.duckNode.gain.rampTo(on ? 0.28 : 1, on ? 0.15 : 0.6);
   }
 
   setVolume(pct) {
