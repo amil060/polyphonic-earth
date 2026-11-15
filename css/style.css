@@ -557,3 +557,11 @@ body { font-size: 16px; }
 .tour-pill button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (max-width: 860px) { .tour-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .tour-btn { padding: 0 12px; } .narrator { font-size: 16px !important; } }
 @media (prefers-reduced-motion: reduce) { .narrator.enter { animation: none; } }
+
+/* About: what's next */
+.next-title { margin: 28px 0 10px; font-size: 16px; color: var(--text); }
+.next-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; counter-reset: next; }
+.next-list li { counter-increment: next; padding: 14px 16px 0 0; border-top: 1px solid var(--hair-strong); display: grid; gap: 4px; align-content: start; }
+.next-list li::before { content: "0" counter(next); font: 500 12px var(--mono); color: var(--accent); }
+.next-list b { font-weight: 500; font-size: 16px; }
+.next-list span { font-size: 15px; line-height: 23px; color: var(--text-2); }
