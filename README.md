@@ -49,7 +49,9 @@ Each scene rendered by the app, sound legend and layer intro included, as lossle
 The start screen has an optional theme song, **"Polyphonic Earth"**, an original composition by our teammate **Ali Aliyev** ([theme.m4a](assets/audio/theme.m4a), 48 s). It plays only when you press its button and fades out as soon as you enter the map, so it never plays over the data.
 
 ### Signature features
-- **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value. Pause for a moment and the app fetches **live NASA POWER data** for that point (mean air temperature and rainfall) and reads it out.
+- **60-second tour:** one button plays all five scenes for about ten seconds each and ends with the full Mingachevir scene and its summary. Escape, Pause or Stop tour hand control back to you.
+- **Each scene introduces itself:** a one-line, first-person narrator ("I am the ocean…") appears over the map in the interface language, goes to screen readers, and is spoken aloud when spoken descriptions are on.
+- **Listen by Touch:** move a mouse or finger over the map, or use the arrow keys. The value under the cursor plays as a pitched tone, panned to its position, and a screen reader announces the approximate location and value. Pause for a moment and the app sends a **live request to the NASA POWER API** for that point and reads out its 1981–2020 average air temperature and rainfall; a red LIVE badge marks the answer.
 - **Stereo map:** in every scene, west sounds on the left and east on the right.
 - **Time Machine:** hear 12 years of human light. The app also *measures* total detected light per year from the NASA frames and charts it.
 - **"What am I hearing?":** a legend that explains every sound layer, plus live descriptions on demand.
