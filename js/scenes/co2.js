@@ -1,6 +1,6 @@
 // Carbon Dioxide — DYAMOND / GEOS global CO₂ simulation (NASA SVS #5196)
 /* global Tone */
-import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115200129';
+import { MAQAM, micro, microChord, panOf, clamp01 } from '../engine.js?v=20261115200522';
 
 export const co2 = {
   id: 'co2',

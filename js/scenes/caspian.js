@@ -1,105 +1,129 @@
-// Caspian & Mingachevir — 44 years of warming at home (NASA POWER + NASA GIBS MODIS imagery)
+// Azerbaijan, west to east — eight cities, five decades of warming (NASA POWER + NASA GIBS MODIS imagery)
+// Each bar is one decade (1980s → 2020s). The sweep plays the eight cities from west to east, so the
+// left-to-right movement is real geography: Nakhchivan sounds on the left, Baku on the right. A note's
+// pitch is how much warmer that city's decade was than its own 1981–1990 average.
 /* global Tone */
-import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115200129';
-import { yearlySeries } from '../power.js?v=20261115200129';
+import { MAQAM, micro, microChord, clamp01 } from '../engine.js?v=20261115200522';
 
-const LAT = 40.76, LON = 47.05;              // Mingachevir, Azerbaijan
 const BOX = { lonW: 43, lonE: 55, latN: 48, latS: 36 }; // the satellite image bounds
-const PX = { x: (LON - BOX.lonW) / (BOX.lonE - BOX.lonW), y: (BOX.latN - LAT) / (BOX.latN - BOX.latS) };
+const toX = (lon) => (lon - BOX.lonW) / (BOX.lonE - BOX.lonW);
+const toY = (lat) => (BOX.latN - lat) / (BOX.latN - BOX.latS);
+const DECADES = [
+  { label: '1980s', from: 1981, to: 1990 },
+  { label: '1990s', from: 1991, to: 2000 },
+  { label: '2000s', from: 2001, to: 2010 },
+  { label: '2010s', from: 2011, to: 2020 },
+  { label: '2020s', from: 2021, to: 2024 },
+];
+const N_CITIES = 8;
+const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+const signed = (v) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
 
 export const caspian = {
   id: 'caspian',
   key: '5',
-  title: 'Caspian & Mingachevir 1981 → 2024',
-  short: 'Caspian',
+  title: 'Azerbaijan, west to east 1981 → 2024',
+  short: 'Azerbaijan',
   icon: 'globe',
   accent: '#34d399',
-  subtitle: 'Our home region. Each note is one year of measured air temperature in Mingachevir, Azerbaijan.',
+  subtitle: 'Eight cities from Nakhchivan to Baku. Each bar is one decade; each note is one city, played from west to east.',
   media: { type: 'image', src: 'assets/data/caspian.jpg' },
   geo: { lon0: BOX.lonW, lonSpan: BOX.lonE - BOX.lonW, latTop: BOX.latN, latBottom: BOX.latS },
   series: true, // music comes from a data series, not from the image pixels
   credit: {
-    text: 'NASA POWER (MERRA-2) yearly mean air temperature and rainfall for Mingachevir, 1981–2024; image: NASA GIBS, MODIS Terra corrected reflectance, 15 July 2023',
+    text: 'NASA POWER (MERRA-2) yearly mean air temperature and rainfall for eight Azerbaijani cities, 1981–2024; image: NASA GIBS, MODIS Terra corrected reflectance, 15 July 2023',
     url: 'https://power.larc.nasa.gov/',
   },
   scale: MAQAM.rast,
   base: 48,
-  bpm: 72,
-  refLabels: ['the coolest year', 'the warmest year'],
+  bpm: 66,
+  refLabels: ['no change from the 1980s', 'the most warming'],
   layers: [
-    { id: 'melody', label: 'Years' },
-    { id: 'harmony', label: 'Decade chord' },
+    { id: 'melody', label: 'Cities' },
+    { id: 'harmony', label: 'National chord' },
     { id: 'bass', label: '1980s baseline' },
     { id: 'texture', label: 'Rain' },
   ],
   legend: [
-    { ico: 'music', title: 'Melody: one note per year', text: 'From 1981 to 2024. A warmer year plays a higher note. Listen to the line climb.' },
-    { ico: 'trend', title: 'Drone: the 1980s', text: 'The low drone is the 1981–1990 average. Notes that sit above it are warmer than the 1980s.' },
-    { ico: 'layers', title: 'Chord: each decade', text: 'The chord moves up as each decade becomes warmer than the last.' },
-    { ico: 'rain', title: 'Rain: yearly rainfall', text: 'The soft rain grows in wetter years.' },
+    { ico: 'music', title: 'Melody: one note per city', text: 'Eight cities from west (left ear) to east (right ear): Nakhchivan, Ganja, Mingachevir, Gabala, Shamakhi, Lankaran, Sumgait, Baku.' },
+    { ico: 'trend', title: 'Pitch: warming since the 1980s', text: 'A higher note means that city’s decade was warmer than its own 1981–1990 average. Each bar is the next decade.' },
+    { ico: 'layers', title: 'Chord: the whole country', text: 'The chord follows the average warming of all eight cities and climbs decade by decade.' },
+    { ico: 'rain', title: 'Rain: rainfall', text: 'The soft rain grows in wetter places and decades.' },
   ],
 
   data: null,
-  idx: 0,
+  idx: 0, // step counter: decade = floor(idx / 8), city = idx % 8
 
   async load() {
     if (this.data) return this.data;
-    const d = await yearlySeries(LAT, LON, 'assets/data/mingachevir-power.json');
-    const t = d.t2m_c;
-    const min = Math.min(...t), max = Math.max(...t);
-    const base = t.slice(0, 10).reduce((a, b) => a + b, 0) / 10;
-    const iMin = t.indexOf(min), iMax = t.indexOf(max);
-    this.refLabels = [`the coolest year, ${d.years[iMin]}: ${min.toFixed(1)} °C`, `the warmest year, ${d.years[iMax]}: ${max.toFixed(1)} °C`];
-    this.data = { ...d, min, max, base };
+    const j = await fetch('assets/data/azerbaijan-power.json').then((r) => r.json());
+    const years = j.years;
+    const cities = j.cities.map((c) => {
+      const pick = (arr, d) => arr.filter((_, i) => years[i] >= d.from && years[i] <= d.to);
+      const dec = DECADES.map((d) => avg(pick(c.t2m_c, d)));
+      const rain = DECADES.map((d) => avg(pick(c.precip_mm_day, d)));
+      return { ...c, x: toX(c.lon), y: toY(c.lat), anom: dec.map((t) => t - dec[0]), rain, early: avg(c.t2m_c.slice(0, 10)), late: avg(c.t2m_c.slice(-10)) };
+    });
+    const all = cities.flatMap((c) => c.anom);
+    const min = Math.min(...all), max = Math.max(...all);
+    const national = DECADES.map((_, d) => avg(cities.map((c) => c.anom[d])));
+    const top = cities.reduce((a, b) => (b.late - b.early > a.late - a.early ? b : a));
+    this.places = cities.map((c) => ({ name: c.name, x: c.x, y: c.y }));
+    this.refLabels = [`${signed(min)} °C, no change from the 1980s`, `${signed(max)} °C, the most warming (${cities.find((c) => c.anom.includes(max)).name}, ${DECADES[cities.find((c) => c.anom.includes(max)).anom.indexOf(max)].label})`];
+    this.data = { cities, min, max, national, top };
     return this.data;
   },
 
-  norm(t) { const d = this.data; return clamp01((t - d.min) / (d.max - d.min)); },
+  norm(a) { const d = this.data; return clamp01((a - d.min) / (d.max - d.min)); },
+  decadeAt(i) { return Math.min(DECADES.length - 1, Math.floor(i / N_CITIES)); },
 
-  // Columns for the sweep: the 8 years the next bar will play, all placed on Mingachevir.
+  // Columns for the sweep: the eight cities of the decade the next bar will play, at their real places.
   columns(n) {
     const d = this.data;
     if (!d) return [];
+    const dec = this.decadeAt(this.idx);
     return Array.from({ length: n }, (_, k) => {
-      const i = (this.idx + k) % d.years.length;
-      return { index: k, x: PX.x, lat: PX.y, mean: this.norm(d.t2m_c[i]), coverage: 0.5, energy: this.norm(d.t2m_c[i]), peak: 1, year: d.years[i], t: d.t2m_c[i] };
+      const c = d.cities[k % N_CITIES];
+      const v = this.norm(c.anom[dec]);
+      return { index: k, x: c.x, lat: c.y, mean: v, coverage: 0.5, energy: v, peak: 1, city: c.name, decade: DECADES[dec].label, anom: c.anom[dec] };
     });
   },
 
   stats() {
     const d = this.data;
     if (!d) return { mean: 0, coverage: 0, energy: 0, motion: 0, north: 0, south: 0 };
-    const i = this.idx % d.years.length;
-    return { mean: this.norm(d.t2m_c[i]), coverage: 1, energy: 0, motion: 0, north: 0, south: 0, year: d.years[i], t: d.t2m_c[i] };
+    const dec = this.decadeAt(this.idx);
+    return { mean: this.norm(d.national[dec]), coverage: 1, energy: 0, motion: 0, north: 0, south: 0 };
   },
 
   current() {
     const d = this.data;
     if (!d) return null;
-    const i = this.idx % d.years.length;
-    return { year: d.years[i], t: d.t2m_c[i], rain: d.precip_mm_day[i], anomaly: d.t2m_c[i] - d.base };
+    const dec = this.decadeAt(this.idx);
+    return { decade: DECADES[dec].label, anomaly: d.national[dec] };
   },
 
   readout() {
     const c = this.current();
-    return c ? { label: `${c.year} · vs 1980s`, value: `${c.t.toFixed(1)} °C ${c.anomaly >= 0 ? '+' : ''}${c.anomaly.toFixed(1)}` } : null;
+    return c ? { label: `${c.decade} · vs 1980s`, value: `${signed(c.anomaly)} °C` } : null;
   },
 
   value() { return null; }, // the image is context only; Listen by Touch uses NASA POWER values
 
   label(v) {
-    if (v == null) return 'Caspian region';
-    if (v < 0.33) return 'a cool year';
-    if (v < 0.66) return 'a mild year';
-    return 'a hot year';
+    if (v == null) return 'Azerbaijan';
+    if (v < 0.33) return 'little warming';
+    if (v < 0.66) return 'clear warming';
+    return 'strong warming';
   },
 
   build(engine) {
     const n = (this.nodes = {});
-    n.vib = new Tone.Vibrato(4.5, 0.1).connect(engine.bus);
+    n.pan = new Tone.Panner(0).connect(engine.bus);
+    n.vib = new Tone.Vibrato(4.5, 0.1).connect(n.pan);
     n.lead = new Tone.FMSynth({
-      harmonicity: 2, modulationIndex: 1.2, portamento: 0.1,
-      envelope: { attack: 0.05, decay: 0.5, sustain: 0.35, release: 2 },
+      harmonicity: 2, modulationIndex: 1.2, portamento: 0.05,
+      envelope: { attack: 0.05, decay: 0.5, sustain: 0.35, release: 1.6 },
       volume: -8,
     }).connect(n.vib);
     n.padFilter = new Tone.Filter(1600, 'lowpass').connect(engine.bus);
@@ -111,40 +135,43 @@ export const caspian = {
   },
 
   reference(v, time) {
+    this.nodes.pan.pan.rampTo(0, 0.06, time);
     this.nodes.lead.triggerAttackRelease(micro(v, this.scale, this.base, 2), '2n', time, 0.7);
   },
 
   onBar(stats, time, on) {
     const n = this.nodes, d = this.data;
     if (!d) return;
-    // decade chord: average of the next 8 years
-    const win = Array.from({ length: 8 }, (_, k) => d.t2m_c[(this.idx + k) % d.years.length]);
-    const avg = win.reduce((a, b) => a + b, 0) / win.length;
-    const root = Math.round(this.norm(avg) * 6);
+    const dec = this.decadeAt(this.idx);
+    const root = Math.round(this.norm(d.national[dec]) * 6);
     if (on('harmony')) n.pad.triggerAttackRelease(microChord(root, [0, 2, 4], this.scale, 48), '1m', time, 0.5);
-    if (on('bass')) n.bass.triggerAttackRelease(micro(this.norm(d.base), this.scale, 36, 2), '1m', time, 0.6);
+    if (on('bass')) n.bass.triggerAttackRelease(micro(this.norm(0), this.scale, 36, 2), '1m', time, 0.6);
   },
 
   onStep(col, time, on) {
     const d = this.data;
     if (!d) return 0;
-    const i = this.idx % d.years.length;
-    this.idx = (this.idx + 1) % d.years.length;
-    const v = this.norm(d.t2m_c[i]);
-    if (on('texture')) this.nodes.rainGain.gain.rampTo(clamp01(d.precip_mm_day[i] / 2) * 0.12, 0.3, time);
+    const i = this.idx;
+    const dec = this.decadeAt(i), k = i % N_CITIES;
+    this.idx = (i + 1) % (DECADES.length * N_CITIES);
+    const c = d.cities[k];
+    const v = this.norm(c.anom[dec]);
+    this.nodes.pan.pan.rampTo((c.x - 0.2) / 0.37 * 1.6 - 0.8, 0.08, time); // west = left ear, east = right ear
+    if (on('texture')) this.nodes.rainGain.gain.rampTo(clamp01(c.rain[dec] / 2) * 0.12, 0.3, time);
     else this.nodes.rainGain.gain.rampTo(0, 0.5, time);
     if (!on('melody')) return 0;
     this.nodes.lead.triggerAttackRelease(micro(v, this.scale, this.base, 2), '8n', time, 0.4 + v * 0.4);
-    col.year = d.years[i]; col.t = d.t2m_c[i]; col.mean = v;
+    Object.assign(col, { city: c.name, decade: DECADES[dec].label, anom: c.anom[dec], mean: v, x: c.x, lat: c.y });
     return 0.4 + v * 0.5;
   },
 
   describe() {
     const c = this.current(), d = this.data;
-    if (!c) return 'Loading NASA POWER data for Mingachevir…';
-    const late = d.t2m_c.slice(-10).reduce((a, b) => a + b, 0) / 10;
-    return `Mingachevir, Azerbaijan. ${c.year}: ${c.t.toFixed(1)} °C, ${Math.abs(c.anomaly).toFixed(1)} °C ${c.anomaly >= 0 ? 'warmer' : 'cooler'} than the 1981–1990 average. ` +
-      `The last ten years averaged ${late.toFixed(1)} °C, ${(late - d.base).toFixed(1)} °C above the 1980s.${d.live ? ' Data loaded live from NASA POWER.' : ''}`;
+    if (!c) return 'Loading NASA POWER data for eight Azerbaijani cities…';
+    const lateAll = avg(d.cities.map((x) => x.late - x.early));
+    return `Azerbaijan, ${c.decade}: the eight cities were on average ${signed(c.anomaly)} °C compared with the 1980s. ` +
+      `Over 2015–2024 every city was warmer than in 1981–1990, by ${lateAll.toFixed(1)} °C on average; the most in ${d.top.name} (${signed(d.top.late - d.top.early)} °C). ` +
+      'Notes move from Nakhchivan in the west to Baku in the east.';
   },
 
   dispose() {

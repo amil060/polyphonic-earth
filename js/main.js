@@ -1,15 +1,15 @@
 // Polyphonic Earth — app controller: scenes, jukebox transport, Listen by Touch, accessibility.
 /* global Tone */
-import { Analyzer } from './analyzer.js?v=20261115200129';
-import { Engine, clamp01 } from './engine.js?v=20261115200129';
-import { ocean } from './scenes/ocean.js?v=20261115200129';
-import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115200129';
-import { lightning } from './scenes/lightning.js?v=20261115200129';
-import { co2 } from './scenes/co2.js?v=20261115200129';
-import { caspian } from './scenes/caspian.js?v=20261115200129';
-import { climateAt } from './power.js?v=20261115200129';
-import { icon } from './icons.js?v=20261115200129';
-import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115200129';
+import { Analyzer } from './analyzer.js?v=20261115200522';
+import { Engine, clamp01 } from './engine.js?v=20261115200522';
+import { ocean } from './scenes/ocean.js?v=20261115200522';
+import { nightlights, YEARS } from './scenes/nightlights.js?v=20261115200522';
+import { lightning } from './scenes/lightning.js?v=20261115200522';
+import { co2 } from './scenes/co2.js?v=20261115200522';
+import { caspian } from './scenes/caspian.js?v=20261115200522';
+import { climateAt } from './power.js?v=20261115200522';
+import { icon } from './icons.js?v=20261115200522';
+import { LANGS, getLang, setLang, t, applyI18n } from './i18n.js?v=20261115200522';
 
 const SCENES = [ocean, nightlights, lightning, co2, caspian];
 const STEPS = 8; // slices per sweep: fewer, longer notes are easier to follow by ear
@@ -241,7 +241,7 @@ const SCALE_UI = { // gradients run top (high value) → bottom (low value), sam
   change: { grad: ['#a855f7', '#e9d5ff', '#ffffff', '#fdba74', '#f97316'], top: ['Brighter', 'rising chimes'], bottom: ['Darker', 'falling tones'] },
   lightning: { grad: ['#e9f04a', '#8f9a28', '#3a3a3a'], top: ['Many flashes', 'hard drum hits'], bottom: ['No flashes', 'silence'] },
   co2: { grad: ['#e11d1d', '#e8651e', '#e6a04a', '#d8c08a'], top: ['High CO₂', 'tense, bright'], bottom: ['Background', 'calm'] },
-  caspian: { grad: ['#ef4444', '#f59e0b', '#a3e635', '#22d3ee', '#3b82f6'], top: ['Warmest year', 'highest note'], bottom: ['Coolest year', 'lowest note'] },
+  caspian: { grad: ['#ef4444', '#f59e0b', '#a3e635', '#22d3ee', '#3b82f6'], top: ['Most warming', 'highest note'], bottom: ['As in the 1980s', 'lowest note'] },
 };
 function applyScale() {
   const s = state.scene;
@@ -278,10 +278,10 @@ const SCIENCE = {
     limits: 'Concentrations are relative to the visualization colour scale, not ppm. The camera moves, so the view is not a fixed region.',
   },
   caspian: {
-    data: 'NASA POWER (MERRA-2): yearly mean air temperature and rainfall for Mingachevir, Azerbaijan, 1981–2024. Image: NASA GIBS MODIS.',
-    sound: 'One note per year in order. Pitch = that year’s temperature between the coolest and warmest year. A drone holds the 1981–1990 average.',
-    meaning: 'When the melody sits above the drone, the year was warmer than the 1980s. Hear the line climb across four decades.',
-    limits: 'POWER values are model-based reanalysis on a 0.5° × 0.625° grid, so they describe the area around Mingachevir, not one weather station.',
+    data: 'NASA POWER (MERRA-2): yearly mean air temperature and rainfall for eight Azerbaijani cities, 1981–2024, from Nakhchivan in the west to Baku in the east. Image: NASA GIBS MODIS.',
+    sound: 'Each bar is one decade, from the 1980s to the 2020s. The sweep plays the eight cities from west (left ear) to east (right ear). Pitch = how much warmer that city’s decade was than its own 1981–1990 average.',
+    meaning: 'Hear every city climb, decade after decade. The chord follows the national average; the drone stays at the 1980s level.',
+    limits: 'POWER values are model-based reanalysis for the grid cell (about 50 km) around each city, not single weather stations. Shaki was left out because it shares a grid cell with Mingachevir. The 2020s cover only 2021–2024.',
   },
 };
 
@@ -507,13 +507,15 @@ const SUMMARY = {
   }),
   caspian: () => {
     const d = caspian.data;
-    const late = d ? d.t2m_c.slice(-10).reduce((a, b) => a + b, 0) / 10 : null;
+    const rise = d ? d.cities.map((c) => c.late - c.early) : null;
+    const avgRise = rise ? rise.reduce((x, y) => x + y, 0) / rise.length : null;
+    const ming = d ? d.cities.find((c) => c.name === 'Mingachevir') : null;
     return {
       heard: d
-        ? `44 years in Mingachevir, one note per year. The melody spent more and more time above the low drone of the 1980s: the last ten years averaged ${late.toFixed(1)} °C, ${(late - d.base).toFixed(1)} °C warmer than 1981–1990.`
-        : 'Forty-four years in Mingachevir, one note per year, rising as the region warmed.',
-      why: 'This is home for our team. A warmer region means more evaporation from rivers, reservoirs and the Caspian Sea, which matters for drinking water, farming and the Mingachevir reservoir. A 2017 study linked warming over the Caspian to a sea-level drop of about 1.5 m between 1996 and 2015.',
-      source: 'Data: NASA POWER (MERRA-2) for Mingachevir, 1981–2024; image NASA GIBS MODIS. Sea-level figure: Chen et al., "Long-term Caspian Sea level change", Geophysical Research Letters, 2017, doi:10.1002/2017GL073958.',
+        ? `Eight cities from Nakhchivan to Baku, five decades. Every city climbed: in 2015–2024 all eight were warmer than in 1981–1990, by ${avgRise.toFixed(1)} °C on average (from ${Math.min(...rise).toFixed(1)} to ${Math.max(...rise).toFixed(1)} °C). Mingachevir, our home, rose by ${(ming.late - ming.early).toFixed(1)} °C.`
+        : 'Eight Azerbaijani cities from west to east, decade by decade, rising as the country warmed.',
+      why: 'This is home for our team. A warmer country means more evaporation from rivers, reservoirs and the Caspian Sea, which matters for drinking water, farming and the Mingachevir reservoir. A 2017 study linked warming over the Caspian to a sea-level drop of about 1.5 m between 1996 and 2015.',
+      source: 'Data: NASA POWER (MERRA-2) for eight Azerbaijani cities, 1981–2024; image NASA GIBS MODIS. Sea-level figure: Chen et al., "Long-term Caspian Sea level change", Geophysical Research Letters, 2017, doi:10.1002/2017GL073958.',
     };
   },
 };
@@ -781,9 +783,21 @@ function draw() {
   }
 
   // sweep band
+  const places = state.scene?.places;
+  if (places) { // series scenes with real places: dots and names, so the sweep's geography is visible
+    octx.font = '500 12px "IBM Plex Sans", sans-serif';
+    octx.textAlign = 'center';
+    places.forEach((p, i) => {
+      const on = state.playing && i === state.drawStep;
+      octx.fillStyle = on ? accent : '#ffffffcc';
+      octx.beginPath(); octx.arc(p.x * W, p.y * H, on ? 5 : 3, 0, Math.PI * 2); octx.fill();
+      octx.fillStyle = on ? '#ffffff' : '#ffffffb0';
+      octx.fillText(p.name, p.x * W, p.y * H + (i % 2 ? 18 : -10));
+    });
+  }
   if (state.playing && state.drawStep !== undefined) {
-    const bw = W / STEPS;
-    const x = state.drawStep * bw;
+    const bw = places ? W / STEPS * 0.6 : W / STEPS;
+    const x = places ? places[state.drawStep % places.length].x * W - bw / 2 : state.drawStep * bw;
     const g = octx.createLinearGradient(x, 0, x + bw, 0);
     g.addColorStop(0, accent + '00'); g.addColorStop(0.5, accent + (reducedMotion ? '22' : '44')); g.addColorStop(1, accent + '00');
     octx.fillStyle = g;
@@ -973,7 +987,8 @@ function logNote(col, str, now) {
   const secs = Math.max(0, Math.floor((now - (state.playStart || now)) / 1000));
   const t = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
   let where = `slice ${col.index + 1}/${STEPS}`;
-  if (col.year) where = `${col.year} · ${col.t.toFixed(1)} °C`;
+  if (col.city) where = `${col.city}, ${col.decade} · ${col.anom >= 0 ? '+' : ''}${col.anom.toFixed(1)} °C vs 1980s`;
+  else if (col.year) where = `${col.year} · ${col.t.toFixed(1)} °C`;
   else if (s.geo) where = fmtLatLon(latLon(s, col.x, col.lat)).replace(',', '');
   const li = document.createElement('li');
   li.innerHTML = `<span>${t}</span><span class="n">♪</span><span>${where} · ${s.label(col.mean)} · ${Math.round(str * 100)}%</span>`;
@@ -1168,7 +1183,7 @@ async function startTour() {
   if (state.touch) setTouch(false);
   tour.on = true;
   el.stage.focus({ preventScroll: true });
-  setLive(`Tour: all ${SCENES.length} scenes, about ten seconds each, ending with Mingachevir. Press Escape to stop.`);
+  setLive(`Tour: all ${SCENES.length} scenes, about ten seconds each, ending with Azerbaijan. Press Escape to stop.`);
   await tourGo(0);
 }
 function stopTour() {
@@ -1283,7 +1298,8 @@ function noteCaption(col, str) {
   const pitch = v >= 0.67 ? 'high' : v >= 0.34 ? 'middle' : 'low';
   const loud = str >= 0.66 ? 'loud' : str >= 0.33 ? '' : 'soft';
   let where = '';
-  if (col.year) where = ` · ${col.year}, ${col.t.toFixed(1)} °C`;
+  if (col.city) where = ` · ${col.city}, ${col.decade}, ${col.anom >= 0 ? '+' : ''}${col.anom.toFixed(1)} °C vs 1980s`;
+  else if (col.year) where = ` · ${col.year}, ${col.t.toFixed(1)} °C`;
   else if (s.geo) where = ` · ${fmtLatLon(latLon(s, col.x, col.lat))}`;
   caption(`♪ ${[loud, pitch, VOICE_NAME[s.id] || 'note'].filter(Boolean).join(' ')} · ${s.label(v)}${where}`);
 }
